@@ -1,0 +1,33 @@
+'use client';
+import { useEffect, useRef } from 'react';
+import * as Phaser from 'phaser';
+import { phaserConfig } from './PhaserConfig';
+import { MainScene } from './MainScene';
+
+export default function GameBridge() {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const gameRef = useRef<Phaser.Game | null>(null);
+
+    useEffect(() => {
+        if (!containerRef.current || gameRef.current) return;
+
+        const config = {
+            ...phaserConfig,
+            parent: containerRef.current,
+            scene: [MainScene]
+        };
+
+        gameRef.current = new Phaser.Game(config);
+
+        return () => {
+            gameRef.current?.destroy(true);
+            gameRef.current = null;
+        };
+    }, []);
+
+    return (
+        <div className="w-screen h-screen bg-black">
+            <div ref={containerRef} className="w-full h-full" />
+        </div>
+    );
+}
