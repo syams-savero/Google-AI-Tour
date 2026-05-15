@@ -466,6 +466,13 @@ export class MainScene extends Phaser.Scene {
 
     update() {
         if (!this.playerContainer || !this.cursors) return;
+
+        // TRANSISI KE LANTAI 2 (GEMINI ROOM) - Harus di Paling Atas biar nggak kehalang 'return'
+        if (this.playerContainer.x > 1850) {
+            this.scene.start('GeminiScene', { playerName: this.playerName });
+            return;
+        }
+
         const body = this.playerContainer.body as Phaser.Physics.Arcade.Body;
         body.setVelocity(0);
         if (this.isDialogActive || this.isWaitingForName) return;
