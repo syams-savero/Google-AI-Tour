@@ -15,7 +15,7 @@ export default function GameBridge() {
         const config = {
             ...phaserConfig,
             parent: containerRef.current,
-            scene: [MainScene, GeminiScene]
+            scene: [GeminiScene, MainScene]
         };
 
         gameRef.current = new Phaser.Game(config);

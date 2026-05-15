@@ -60,7 +60,26 @@ export class GeminiScene extends Phaser.Scene {
             ease: 'Sine.easeInOut'
         });
 
-        // 3. UI
+        // 3. Barriers (Tembok Gaib)
+        this.barriers = this.physics.add.staticGroup();
+
+        // Tembok Atas (Dinding)
+        this.barriers.add(this.add.rectangle(960, 440, 1920, 80, 0x0000ff, 0));
+
+        // Meja Kerja Besar di Tengah Bawah - Digeser lebih bawah & diperlebar
+        this.barriers.add(this.add.rectangle(960, 980, 2000, 200, 0xff0000, 0));
+
+        // Pot Tanaman (Kiri)
+        this.barriers.add(this.add.rectangle(65, 940, 120, 100, 0x00ff00, 0));
+        this.barriers.add(this.add.rectangle(190, 940, 120, 100, 0x00ff00, 0));
+
+        // Pot Tanaman (Kanan)
+        this.barriers.add(this.add.rectangle(1730, 940, 120, 100, 0x00ff00, 0));
+        this.barriers.add(this.add.rectangle(1855, 940, 120, 100, 0x00ff00, 0));
+
+        this.physics.add.collider(this.playerContainer, this.barriers);
+
+        // 4. UI
         this.createDialogUI();
 
         if (this.input.keyboard) {
@@ -139,6 +158,13 @@ export class GeminiScene extends Phaser.Scene {
 
     update() {
         if (!this.playerContainer || !this.cursors) return;
+
+        // TRANSISI BALIK KE LANTAI 1
+        if (this.playerContainer.x < 40) {
+            this.scene.start('MainScene');
+            return;
+        }
+
         const body = this.playerContainer.body as Phaser.Physics.Arcade.Body;
         body.setVelocity(0);
         if (this.isDialogActive) return;
