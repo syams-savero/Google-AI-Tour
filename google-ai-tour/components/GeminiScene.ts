@@ -79,6 +79,27 @@ export class GeminiScene extends Phaser.Scene {
 
         this.physics.add.collider(this.playerContainer, this.barriers);
 
+        // 3.5. Pasukan Robot Gemini (Di depan TV Merah)
+        const robotPositions = [
+            { x: 280, y: 520 },  // TV 1 (Kiri)
+            { x: 1160, y: 520 }, // TV 3 (Tengah Kanan)
+            { x: 1680, y: 520 }  // TV 4 (Kanan Ujung)
+        ];
+
+        robotPositions.forEach((pos, index) => {
+            const robot = this.add.sprite(pos.x, pos.y, 'dr_gemini').setScale(1.2);
+
+            // Efek Melayang Berbeda-beda (biar lebih alami)
+            this.tweens.add({
+                targets: robot,
+                y: pos.y - 15,
+                duration: 1500 + (index * 200),
+                yoyo: true,
+                repeat: -1,
+                ease: 'Sine.easeInOut'
+            });
+        });
+
         // 4. UI
         this.createDialogUI();
 
