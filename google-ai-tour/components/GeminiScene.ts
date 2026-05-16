@@ -9,8 +9,12 @@ export class GeminiScene extends Phaser.Scene {
     private gradientGraphics!: Phaser.GameObjects.Graphics;
     private dialogText!: Phaser.GameObjects.Text;
     private barriers!: Phaser.Physics.Arcade.StaticGroup;
+    private interactPrompt!: Phaser.GameObjects.Text;
+    private smallRobots: Phaser.GameObjects.Sprite[] = [];
+    private drGeminiNPC!: Phaser.GameObjects.Sprite;
+    private activeRobot: any = null;
 
-    private playerName: string = "User"; // Will be passed from MainScene
+    private playerName: string = "User";
     private isDialogActive: boolean = false;
     private isTyping: boolean = false;
     private fullText: string = "";
@@ -27,17 +31,18 @@ export class GeminiScene extends Phaser.Scene {
     preload() {
         this.load.image('bg2', '/assets/Map2.png');
         this.load.image('player_robot', '/assets/gogole.png');
-        this.load.image('dr_gemini', '/assets/robotGemini.png'); // Menggunakan robotGemini sebagai pendamping
+        this.load.image('gogole_portrait', '/assets/gogoleSapa.png');
+        this.load.image('robot_mini', '/assets/robotGemini.png');
         this.load.image('dr_gemini_portrait', '/assets/DrGemini.png');
     }
 
     create() {
-        // 1. Setup Background (1920x1080)
+        // 1. Setup Background
         this.add.image(0, 0, 'bg2').setOrigin(0, 0);
         this.physics.world.setBounds(0, 0, 1920, 1080);
         this.cameras.main.setBounds(0, 0, 1920, 1080);
 
-        // 2. Player (Start dari Kiri karena baru masuk dari Lantai 1)
+        // 2. Player
         this.playerContainer = this.add.container(100, 800);
         this.physics.world.enable(this.playerContainer);
         this.playerSprite = this.add.sprite(0, 0, 'player_robot');
@@ -45,12 +50,10 @@ export class GeminiScene extends Phaser.Scene {
 
         const body = this.playerContainer.body as Phaser.Physics.Arcade.Body;
         body.setCollideWorldBounds(true);
-        body.setSize(80, 80);
-        body.setOffset(-40, -40);
+        body.setSize(80, 80).setOffset(-40, -40);
 
         this.cameras.main.startFollow(this.playerContainer, true, 0.1, 0.1);
 
-        // Float Effect
         this.tweens.add({
             targets: this.playerSprite,
             y: '-=15',
@@ -60,36 +63,31 @@ export class GeminiScene extends Phaser.Scene {
             ease: 'Sine.easeInOut'
         });
 
-        // 3. Barriers (Tembok Gaib)
+        // 3. Barriers
         this.barriers = this.physics.add.staticGroup();
-
-        // Tembok Atas (Dinding)
         this.barriers.add(this.add.rectangle(960, 440, 1920, 80, 0x0000ff, 0));
-
-        // Meja Kerja Besar di Tengah Bawah - Digeser lebih bawah & diperlebar
         this.barriers.add(this.add.rectangle(960, 980, 2000, 200, 0xff0000, 0));
-
-        // Pot Tanaman (Kiri)
         this.barriers.add(this.add.rectangle(65, 940, 120, 100, 0x00ff00, 0));
         this.barriers.add(this.add.rectangle(190, 940, 120, 100, 0x00ff00, 0));
-
-        // Pot Tanaman (Kanan)
         this.barriers.add(this.add.rectangle(1730, 940, 120, 100, 0x00ff00, 0));
         this.barriers.add(this.add.rectangle(1855, 940, 120, 100, 0x00ff00, 0));
-
         this.physics.add.collider(this.playerContainer, this.barriers);
 
-        // 3.5. Pasukan Robot Gemini (Di depan TV Merah)
+        // Dr. Gemini NPC - Geser atas, kiri lagi, & Kecilin dikit (1.7)
+        this.drGeminiNPC = this.add.sprite(780, 740, 'dr_gemini_portrait').setScale(1.7).setDepth(10);
+
+        // Small Robots
         const robotPositions = [
-            { x: 280, y: 520 },  // TV 1 (Kiri)
-            { x: 1160, y: 520 }, // TV 3 (Tengah Kanan)
-            { x: 1680, y: 520 }  // TV 4 (Kanan Ujung)
+            { x: 280, y: 520, info: `Halo ${this.playerName}, saat ini aku sedang coding pake Gemini nih!` },
+            { x: 1160, y: 520, info: `Halo ${this.playerName}, aku lagi ngitung rumus matematika yang rumit banget pake bantuan Gemini!` },
+            { x: 1680, y: 520, info: `Halo ${this.playerName}, aku lagi bikin jadwal proyek nih pake Gemini biar makin rapi.` }
         ];
 
+        this.smallRobots = [];
         robotPositions.forEach((pos, index) => {
-            const robot = this.add.sprite(pos.x, pos.y, 'dr_gemini').setScale(1.2);
-
-            // Efek Melayang Berbeda-beda (biar lebih alami)
+            const robot = this.add.sprite(pos.x, pos.y, 'robot_mini').setScale(1.2).setDepth(5);
+            (robot as any).infoText = pos.info;
+            this.smallRobots.push(robot);
             this.tweens.add({
                 targets: robot,
                 y: pos.y - 15,
@@ -100,37 +98,45 @@ export class GeminiScene extends Phaser.Scene {
             });
         });
 
-        // 4. UI
         this.createDialogUI();
+
+        this.interactPrompt = this.add.text(0, 0, '[ENTER] Tanya', {
+            fontSize: '20px', color: '#ffffff', backgroundColor: '#4285F4', padding: { x: 10, y: 5 }
+        }).setOrigin(0.5).setAlpha(0).setDepth(2000).setScrollFactor(0);
 
         if (this.input.keyboard) {
             this.cursors = this.input.keyboard.createCursorKeys();
             this.input.keyboard.on('keydown-ENTER', () => {
                 if (this.isTyping) this.completeTypewriter();
-                else if (this.isDialogActive) this.handleInteraction();
+                else if (this.activeRobot && !this.isDialogActive) {
+                    this.showDialog(this.activeRobot.infoText, 'none');
+                }
+                else if (this.isDialogActive) this.closeDialog();
             });
         }
 
-        // Welcome Message Gemini Room
+        // Welcome Greeting
         this.time.delayedCall(1000, () => {
-            this.isDialogActive = true;
-            this.showDialog(`Selamat datang di Ruangan GEMINI, ${this.playerName}! Ini adalah pusat pemrosesan AI tercanggih kami.`);
+            if (!this.activeRobot && !this.isDialogActive)
+                this.showDialog(`Selamat datang di Ruangan GEMINI, ${this.playerName}! Ini adalah pusat pemrosesan AI tercanggih kami.`, 'dr_gemini');
         });
     }
 
-    private handleInteraction() {
-        this.closeDialog();
-    }
-
-    private showDialog(text: string) {
+    private showDialog(text: string, speaker: 'gogole' | 'dr_gemini' | 'none') {
+        this.isDialogActive = true;
         this.fullText = text;
         this.dialogText.setText('');
         this.isTyping = true;
         this.tweens.add({ targets: this.dialogBox, alpha: 1, duration: 200 });
         this.tweens.add({ targets: this.gradientGraphics, alpha: 1, duration: 200 });
 
-        // Show Gemini Portrait
-        this.portraitSprite.setTexture('dr_gemini_portrait').setAlpha(1).setScale(6).setX(-600);
+        if (speaker === 'gogole') {
+            this.portraitSprite.setTexture('gogole_portrait').setAlpha(1).setScale(6).setX(-600).setFlipX(false);
+        } else if (speaker === 'dr_gemini') {
+            this.portraitSprite.setTexture('dr_gemini_portrait').setAlpha(1).setScale(6).setX(600).setFlipX(false);
+        } else {
+            this.portraitSprite.setAlpha(0);
+        }
 
         if (this.typeTimer) this.typeTimer.remove();
         let charIndex = 0;
@@ -179,12 +185,7 @@ export class GeminiScene extends Phaser.Scene {
 
     update() {
         if (!this.playerContainer || !this.cursors) return;
-
-        // TRANSISI BALIK KE LANTAI 1
-        if (this.playerContainer.x < 40) {
-            this.scene.start('MainScene');
-            return;
-        }
+        if (this.playerContainer.x < 40) { this.scene.start('MainScene'); return; }
 
         const body = this.playerContainer.body as Phaser.Physics.Arcade.Body;
         body.setVelocity(0);
@@ -200,5 +201,33 @@ export class GeminiScene extends Phaser.Scene {
         if (vx !== 0 && vy !== 0) { const norm = Math.SQRT2; vx = (vx / norm) * speed; vy = (vy / norm) * speed; }
         else { vx *= speed; vy *= speed; }
         body.setVelocityX(vx); body.setVelocityY(vy);
+
+        // DEPTH SORTING - Gogole Paling Atas (User Request)
+        this.playerContainer.setDepth(9999);
+        this.drGeminiNPC.setDepth(this.drGeminiNPC.y);
+        this.smallRobots.forEach(robot => robot.setDepth(robot.y));
+
+        // Proximity detection for small robots (Manual ENTER)
+        let closestRobot: any = null;
+        let minDist = 180;
+
+        this.smallRobots.forEach(robot => {
+            const dist = Phaser.Math.Distance.Between(this.playerContainer.x, this.playerContainer.y, robot.x, robot.y);
+            if (dist < minDist) {
+                closestRobot = robot;
+                minDist = dist;
+            }
+        });
+
+        if (closestRobot) {
+            this.activeRobot = closestRobot;
+            const cam = this.cameras.main;
+            const sx = (this.activeRobot.x - cam.scrollX) * cam.zoom;
+            const sy = (this.activeRobot.y - 120 - cam.scrollY) * cam.zoom;
+            this.interactPrompt.setPosition(sx, sy).setAlpha(1);
+        } else {
+            this.activeRobot = null;
+            this.interactPrompt.setAlpha(0);
+        }
     }
 }
