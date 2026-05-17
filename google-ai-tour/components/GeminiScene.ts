@@ -31,11 +31,12 @@ export class GeminiScene extends Phaser.Scene {
     // 5: Selesai
     private questState: number = 0;
 
-    // FIX: Tambah callback opsional yang dipanggil setelah sequence dialog selesai
     private onSequenceComplete?: () => void;
+    private dialogSequence: { text: string, speaker: 'gogole' | 'dr_gemini' | 'none', action?: string }[] = [];
+    private currentDialogIndex: number = 0;
 
-    // GEMINI API KEY — isi di sini atau pakai env variable
-    private readonly GEMINI_API_KEY: string = "";
+    // API Key dari .env.local — wajib prefix NEXT_PUBLIC_ untuk Next.js
+    private readonly GEMINI_API_KEY: string = process.env.NEXT_PUBLIC_GEMINI_API_KEY ?? "";
 
     constructor() {
         super('GeminiScene');
@@ -113,7 +114,6 @@ export class GeminiScene extends Phaser.Scene {
 
         this.createDialogUI();
 
-        // FIX: interactPrompt pakai setScrollFactor(0) dan posisi diatur lewat camera space dengan benar
         this.interactPrompt = this.add.text(0, 0, '[ENTER]', {
             fontSize: '20px', color: '#ffffff', backgroundColor: '#4285F4', padding: { x: 10, y: 5 }
         }).setOrigin(0.5).setAlpha(0).setDepth(2000).setScrollFactor(0);
@@ -130,16 +130,12 @@ export class GeminiScene extends Phaser.Scene {
                 } else if (this.isNearGreenTV && (this.questState === 1 || this.questState === 3)) {
                     this.showGeminiInterface();
                 } else if (this.activeRobot) {
-                    // FIX: small robot dialog juga pakai startSequence
-                    this.startSequence(
-                        [{ text: this.activeRobot.infoText, speaker: 'none' }]
-                    );
+                    this.startSequence([{ text: this.activeRobot.infoText, speaker: 'none' }]);
                 }
             });
         }
     }
 
-    // FIX: startSequence sekarang terima optional callback yang dipanggil setelah sequence selesai
     private startSequence(
         seq: { text: string, speaker: 'gogole' | 'dr_gemini' | 'none', action?: string }[],
         onComplete?: () => void
@@ -151,14 +147,10 @@ export class GeminiScene extends Phaser.Scene {
         this.advanceDialog();
     }
 
-    private dialogSequence: { text: string, speaker: 'gogole' | 'dr_gemini' | 'none', action?: string }[] = [];
-    private currentDialogIndex: number = 0;
-
     private handleDrGeminiInteraction() {
         if (this.isDialogActive) return;
 
         if (this.questState === 0) {
-            // Intro → setelah selesai, state jadi 1
             this.startSequence([
                 { text: `Halo ${this.playerName}! Selamat datang di Gemini Lab...`, speaker: 'dr_gemini' },
                 { text: `Tahukah kamu gemini ini AI dari google yang overpower banget lohh`, speaker: 'dr_gemini' },
@@ -171,19 +163,14 @@ export class GeminiScene extends Phaser.Scene {
                 { text: `eh? gimana caranya?`, speaker: 'gogole' },
                 { text: `di sebelah sana ada tv komputer nomor dua, pakai aja lalu tanya gemini untuk membuatkan teks nya`, speaker: 'dr_gemini' },
                 { text: `Ah oke deh`, speaker: 'gogole' }
-            ], () => {
-                // FIX: state transition ada di callback, bukan di advanceDialog()
-                this.questState = 1;
-            });
+            ], () => { this.questState = 1; });
 
         } else if (this.questState === 1) {
-            // FIX: Kalau player ngobrol Dr. Gemini sebelum ke TV, kasih hint
             this.startSequence([
                 { text: `Ayo cepat, pergi ke TV komputer dan tanya Gemini dulu!`, speaker: 'dr_gemini' }
             ]);
 
         } else if (this.questState === 2) {
-            // Kritik → setelah selesai, state jadi 3
             this.startSequence([
                 { text: `eh kok hasilnya gini sih? rasanya kurang`, speaker: 'dr_gemini' },
                 { text: `waduh, kurang gimana?`, speaker: 'gogole' },
@@ -192,34 +179,23 @@ export class GeminiScene extends Phaser.Scene {
                 { text: `Kasih Gemini sebuah ROLE (Peran), tentukan GOAL (Tujuan), beri CONTEXT (Konteks), dan atur VIBE nya.`, speaker: 'dr_gemini' },
                 { text: `Dengan format itu, Gemini bakal ngasih hasil yang jauh lebih sakti!`, speaker: 'dr_gemini' },
                 { text: `ah okedeh kucoba lagi`, speaker: 'gogole' }
-            ], () => {
-                // FIX: state 2 → 3 terjadi setelah dialog Dr. Gemini selesai
-                this.questState = 3;
-            });
+            ], () => { this.questState = 3; });
 
         } else if (this.questState === 3) {
-            // FIX: Kalau player ngobrol Dr. Gemini sebelum ke TV untuk prompt kedua
             this.startSequence([
                 { text: `Ingat, pakai format Powerful Prompt ya! ROLE, GOAL, CONTEXT, dan VIBE!`, speaker: 'dr_gemini' }
             ]);
 
         } else if (this.questState === 4) {
-            // Selesai → setelah selesai, state jadi 5
             this.startSequence([
                 { text: `Wahh ini baru mantapp bangett!!`, speaker: 'dr_gemini' },
                 { text: `teks nya jadi lebih padat, jelas dan kreatif bgt.`, speaker: 'dr_gemini' },
                 { text: `hehe keren kan?`, speaker: 'gogole' },
-                // FIX: showCertificate dipindah ke callback setelah dialog selesai semua
-                { text: `kalau gitu ini aku kasih sertifikat kemenangan buat kamu`, speaker: 'dr_gemini' },
+                { text: `Kamu udah belajar cara prompt yang bener. Keren banget!`, speaker: 'dr_gemini' },
                 { text: `kamu bisa lanjut ke map selanjutnya ya, pintu disebelah kanan sudah terbuka`, speaker: 'dr_gemini' },
                 { text: `oke siap grak!`, speaker: 'gogole' }
-            ], () => {
-                // FIX: sertifikat muncul setelah semua dialog selesai
-                this.questState = 5;
-                this.showCertificateOverlay();
-            });
+            ], () => { this.questState = 5; });
         }
-        // questState === 5: tidak ada dialog, player tinggal jalan ke kanan
     }
 
     private advanceDialog() {
@@ -228,7 +204,6 @@ export class GeminiScene extends Phaser.Scene {
             this.showDialog(next.text, next.speaker);
             this.currentDialogIndex++;
         } else {
-            // FIX: closeDialog dulu, lalu panggil callback kalau ada
             this.closeDialog();
             if (this.onSequenceComplete) {
                 const cb = this.onSequenceComplete;
@@ -249,7 +224,6 @@ export class GeminiScene extends Phaser.Scene {
         if (speaker === 'gogole') {
             this.portraitSprite.setTexture('gogole_portrait').setAlpha(1).setScale(6).setX(-600).setFlipX(false).setDepth(5);
         } else if (speaker === 'dr_gemini') {
-            // FIX: texture bingung dipakai saat questState 2 sudah aktif saat dialog dimulai
             const texture = (this.questState === 2) ? 'dr_gemini_bingung' : 'dr_gemini_portrait';
             this.portraitSprite.setTexture(texture).setAlpha(1).setScale(6).setX(600).setFlipX(false).setDepth(5);
         } else {
@@ -258,7 +232,6 @@ export class GeminiScene extends Phaser.Scene {
 
         if (this.typeTimer) this.typeTimer.remove();
         let charIndex = 0;
-        // FIX: repeat pakai fullText.length - 1 agar tidak overflow
         this.typeTimer = this.time.addEvent({
             delay: 30,
             callback: () => {
@@ -286,36 +259,100 @@ export class GeminiScene extends Phaser.Scene {
         this.portraitSprite.setAlpha(0);
     }
 
-    private async callGeminiAPI(prompt: string): Promise<string> {
-        if (!this.GEMINI_API_KEY) {
-            return (this.questState === 1)
-                ? "Buku adalah gudang ilmu, membaca adalah kuncinya. Literasi itu penting agar kita pintar."
-                : "SAYA ADALAH ASISTEN LITERASI. Berikut teks poster Anda: \n\n'LITERASI: Jendela Masa Depan. Bukalah satu buku dan biarkan imajinasimu terbang melewati cakrawala berpikir. Ayo Membaca!'";
-        }
+    // ── Gemini API Helpers ──────────────────────────────────────────
 
+    // Satu fungsi terpusat untuk semua panggilan ke Gemini API
+    private async fetchGemini(prompt: string, maxTokens: number): Promise<string | null> {
         try {
             const response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.GEMINI_API_KEY}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${this.GEMINI_API_KEY}`,
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         contents: [{ parts: [{ text: prompt }] }],
-                        generationConfig: { maxOutputTokens: 100 }
+                        generationConfig: { maxOutputTokens: maxTokens }
                     })
                 }
             );
             const data = await response.json();
-            return data.candidates[0].content.parts[0].text;
+
+            if (data.error) {
+                console.error("[Gemini] API error:", data.error.message);
+                return null;
+            }
+
+            const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!text) {
+                console.error("[Gemini] Response kosong:", JSON.stringify(data));
+                return null;
+            }
+
+            return text;
         } catch (err) {
-            console.error("Gemini API Error:", err);
-            return "Maaf, koneksi ke Gemini terputus. Coba lagi nanti!";
+            console.error("[Gemini] Fetch error:", err);
+            return null;
         }
     }
 
+    // Validasi prompt — hanya dipanggil di prompt pertama
+    private async validatePrompt(prompt: string): Promise<boolean> {
+        if (!this.GEMINI_API_KEY) {
+            const keywords = ['literasi', 'baca', 'buku', 'poster', 'membaca', 'tulis', 'ilmu', 'pengetahuan'];
+            return keywords.some(k => prompt.toLowerCase().includes(k));
+        }
+
+        const checkPrompt = `Apakah kalimat berikut merupakan permintaan untuk membuat teks poster tentang literasi atau membaca?
+Jawab HANYA dengan satu kata: YA atau TIDAK.
+Kalimat: "${prompt}"`;
+
+        const answer = await this.fetchGemini(checkPrompt, 5);
+        if (!answer) return true; // Kalau validasi gagal, loloskan saja
+        return answer.trim().toUpperCase().includes('YA');
+    }
+
+    // Generate konten dari Gemini
+    private async callGeminiAPI(prompt: string): Promise<string> {
+        if (!this.GEMINI_API_KEY) {
+            return (this.questState === 1)
+                ? "Buku adalah gudang ilmu, membaca adalah kuncinya. Literasi itu penting agar kita pintar."
+                : "LITERASI: Jendela Masa Depan.\n\nSebagai penjaga pengetahuan, aku mengundangmu untuk membuka satu buku hari ini. Biarkan imajinasimu terbang melewati cakrawala berpikir yang tak terbatas. Ayo Membaca!";
+        }
+
+        const result = await this.fetchGemini(prompt, 400);
+        if (!result) return "Maaf, koneksi ke Gemini terputus. Coba lagi nanti!";
+        return result;
+    }
+
+    // ── Gemini UI Overlay ───────────────────────────────────────────
+
     private showGeminiInterface() {
-        // FIX: Cegah buka overlay kalau sudah ada
         if (document.getElementById('gemini-overlay')) return;
+
+        const isFirstPrompt = this.questState === 1;
+
+        const exampleSection = isFirstPrompt ? `
+            <div style="background:#1a2a1a;border:1px solid #34a853;border-radius:12px;padding:16px;margin-bottom:16px;">
+                <div style="color:#34a853;font-weight:bold;margin-bottom:8px;">💡 Contoh Prompt Sederhana:</div>
+                <div style="color:#ccc;font-size:14px;line-height:1.8;">
+                    • <span style="color:#fff;">"Buatkan teks poster tentang pentingnya membaca buku"</span><br>
+                    • <span style="color:#fff;">"Tulis kalimat singkat untuk poster literasi anak SD"</span><br>
+                    • <span style="color:#fff;">"Buat slogan poster yang mengajak orang suka membaca"</span>
+                </div>
+                <div style="color:#888;font-size:12px;margin-top:8px;">Coba ketik salah satu di atas, atau buat sendiri!</div>
+            </div>
+        ` : `
+            <div style="background:#1a1a2e;border:1px solid #9B72CB;border-radius:12px;padding:16px;margin-bottom:16px;">
+                <div style="color:#9B72CB;font-weight:bold;margin-bottom:8px;">🚀 Contoh Powerful Prompt:</div>
+                <div style="color:#ccc;font-size:13px;line-height:2;">
+                    <b style="color:#4285F4;">ROLE:</b> <span style="color:#fff;">Kamu adalah desainer poster kreatif untuk anak-anak</span><br>
+                    <b style="color:#34a853;">GOAL:</b> <span style="color:#fff;">Buat teks poster yang memotivasi anak SD suka membaca</span><br>
+                    <b style="color:#FBBC04;">CONTEXT:</b> <span style="color:#fff;">Poster akan dipasang di perpustakaan sekolah</span><br>
+                    <b style="color:#DB4437;">VIBE:</b> <span style="color:#fff;">Semangat, ceria, dan penuh warna</span>
+                </div>
+                <div style="color:#888;font-size:12px;margin-top:8px;">Gabungkan semuanya jadi satu kalimat panjang!</div>
+            </div>
+        `;
 
         const overlay = document.createElement('div');
         overlay.id = 'gemini-overlay';
@@ -325,27 +362,31 @@ export class GeminiScene extends Phaser.Scene {
             align-items: center; z-index: 10000; font-family: 'Inter', sans-serif;
         `;
         overlay.innerHTML = `
-            <div style="width:800px;height:600px;background:#131314;border-radius:24px;border:1px solid #333;display:flex;flex-direction:column;overflow:hidden;">
-                <div style="padding:20px;border-bottom:1px solid #333;display:flex;align-items:center;justify-content:space-between;">
-                    <span style="color:#fff;font-size:24px;font-weight:600;">Gemini <span style="font-size:14px;opacity:0.5;">v1.5 Flash</span></span>
+            <div style="width:820px;max-height:90vh;background:#131314;border-radius:24px;border:1px solid #333;display:flex;flex-direction:column;overflow:hidden;">
+                <div style="padding:20px;border-bottom:1px solid #333;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+                    <span style="color:#fff;font-size:24px;font-weight:600;">
+                        Gemini <span style="font-size:14px;opacity:0.5;">2.0 Flash</span>
+                    </span>
                     <button id="close-gemini" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:24px;">&times;</button>
                 </div>
-                <div id="chat-area" style="flex:1;padding:20px;overflow-y:auto;color:#fff;">
-                    <div style="color:#888;font-style:italic;">Ada yang bisa saya bantu, ${this.playerName}?</div>
-                    ${this.questState === 3 ? `<div style="color:#9B72CB;margin-top:10px;">💡 Tips: Coba format <b>Powerful Prompt</b> — sebutkan ROLE, GOAL, CONTEXT, dan VIBE kamu!</div>` : ''}
+                <div id="chat-area" style="flex:1;padding:20px;overflow-y:auto;color:#fff;min-height:0;">
+                    <div style="color:#888;font-style:italic;margin-bottom:16px;">Ada yang bisa saya bantu, ${this.playerName}?</div>
+                    ${exampleSection}
                 </div>
-                <div style="padding:20px;background:#1e1f20;">
+                <div style="padding:16px 20px;background:#1e1f20;flex-shrink:0;">
                     <div style="display:flex;gap:10px;background:#2b2d2f;padding:10px 20px;border-radius:100px;">
-                        <input id="gemini-input" placeholder="Ketik prompt poster literasi di sini..." 
-                            style="flex:1;background:none;border:none;color:#fff;outline:none;">
-                        <button id="submit-prompt" 
-                            style="background:#4285F4;border:none;color:#fff;padding:5px 20px;border-radius:100px;cursor:pointer;">
+                        <input id="gemini-input"
+                            placeholder="${isFirstPrompt ? 'Ketik prompt tentang poster literasi...' : 'Ketik Powerful Prompt kamu di sini...'}"
+                            style="flex:1;background:none;border:none;color:#fff;outline:none;font-size:14px;">
+                        <button id="submit-prompt"
+                            style="background:#4285F4;border:none;color:#fff;padding:5px 20px;border-radius:100px;cursor:pointer;white-space:nowrap;">
                             Kirim
                         </button>
                     </div>
                 </div>
             </div>
         `;
+
         document.body.appendChild(overlay);
 
         const chatArea = overlay.querySelector('#chat-area') as HTMLDivElement;
@@ -353,108 +394,88 @@ export class GeminiScene extends Phaser.Scene {
         const submitBtn = overlay.querySelector('#submit-prompt') as HTMLButtonElement;
         const closeBtn = overlay.querySelector('#close-gemini') as HTMLButtonElement;
 
-        // FIX: cleanup overlay dari DOM saat ditutup
         const cleanupOverlay = () => {
             if (document.body.contains(overlay)) overlay.remove();
         };
 
         closeBtn.onclick = cleanupOverlay;
-
-        // FIX: Support Enter key di input field
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') submitBtn.click();
-        });
+        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitBtn.click(); });
+        setTimeout(() => input.focus(), 100);
 
         submitBtn.onclick = async () => {
             const prompt = input.value.trim();
             if (!prompt) return;
 
-            // Disable input selama loading
             input.disabled = true;
             submitBtn.disabled = true;
+            submitBtn.textContent = '...';
 
             chatArea.innerHTML += `
-                <div style="margin-top:20px;color:#4285F4;">Kamu:</div>
-                <div>${prompt}</div>
+                <div style="margin-top:16px;color:#4285F4;font-weight:bold;">Kamu:</div>
+                <div style="margin-top:4px;">${prompt}</div>
             `;
             input.value = '';
-            chatArea.innerHTML += `<div id="ai-loading" style="color:#9B72CB;margin-top:10px;">Gemini sedang menulis...</div>`;
+
+            // Validasi di kedua prompt
+            if (true) {
+                chatArea.innerHTML += `<div id="ai-loading" style="color:#888;margin-top:12px;font-style:italic;">🔍 Mengecek prompt kamu...</div>`;
+                chatArea.scrollTop = chatArea.scrollHeight;
+
+                const isValid = await this.validatePrompt(prompt);
+                overlay.querySelector('#ai-loading')?.remove();
+
+                if (!isValid) {
+                    chatArea.innerHTML += `
+                        <div style="margin-top:12px;background:#2a1a1a;border:1px solid #DB4437;border-radius:10px;padding:14px;">
+                            <div style="color:#DB4437;font-weight:bold;margin-bottom:6px;">❌ Prompt tidak sesuai!</div>
+                            <div style="color:#ccc;font-size:14px;">
+                                Tugasmu adalah membuat <b>teks poster tentang literasi</b>.<br>
+                                Coba lagi dengan prompt yang berhubungan dengan membaca atau buku ya!
+                            </div>
+                        </div>
+                    `;
+                    chatArea.scrollTop = chatArea.scrollHeight;
+                    input.disabled = false;
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Kirim';
+                    return;
+                }
+            }
+
+            chatArea.innerHTML += `<div id="ai-loading" style="color:#9B72CB;margin-top:12px;font-style:italic;">✨ Gemini sedang menulis...</div>`;
             chatArea.scrollTop = chatArea.scrollHeight;
 
             const response = await this.callGeminiAPI(prompt);
-
-            const loading = overlay.querySelector('#ai-loading');
-            if (loading) loading.remove();
+            overlay.querySelector('#ai-loading')?.remove();
 
             chatArea.innerHTML += `
-                <div style="margin-top:20px;color:#9B72CB;">Gemini:</div>
-                <div style="white-space:pre-wrap;">${response}</div>
-                <button id="report-btn" style="margin-top:15px;background:#222;border:1px solid #4285F4;color:#4285F4;padding:8px 16px;border-radius:5px;cursor:pointer;">
-                    Laporkan ke Dr. Gemini
+                <div style="margin-top:16px;color:#9B72CB;font-weight:bold;">Gemini:</div>
+                <div style="margin-top:4px;white-space:pre-wrap;line-height:1.6;">${response}</div>
+                <button id="report-btn" style="margin-top:16px;background:#222;border:1px solid #4285F4;color:#4285F4;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:14px;">
+                    ✅ Laporkan ke Dr. Gemini
                 </button>
             `;
             chatArea.scrollTop = chatArea.scrollHeight;
 
-            // Re-enable input untuk percobaan lain
             input.disabled = false;
             submitBtn.disabled = false;
+            submitBtn.textContent = 'Kirim';
 
             const reportBtn = overlay.querySelector('#report-btn') as HTMLButtonElement;
             reportBtn.onclick = () => {
                 cleanupOverlay();
-
                 if (this.questState === 1) {
-                    // FIX: state 1 → 2, lalu startSequence gogole lapor
-                    // state 2 → 3 akan terjadi setelah dialog Dr. Gemini di questState 2 selesai
                     this.questState = 2;
-                    this.startSequence([{
-                        text: `Hasil pertama sudah aku catat. Ayo lapor ke Dr. Gemini!`,
-                        speaker: 'gogole'
-                    }]);
+                    this.startSequence([{ text: `Hasil pertama sudah aku catat. Ayo lapor ke Dr. Gemini!`, speaker: 'gogole' }]);
                 } else if (this.questState === 3) {
-                    // FIX: state 3 → 4, lalu startSequence gogole lapor
-                    // state 4 → 5 akan terjadi setelah dialog Dr. Gemini di questState 4 selesai
                     this.questState = 4;
-                    this.startSequence([{
-                        text: `Hasil kedua jauh lebih bagus! Dr. Gemini pasti suka.`,
-                        speaker: 'gogole'
-                    }]);
+                    this.startSequence([{ text: `Hasil kedua jauh lebih bagus! Dr. Gemini pasti suka.`, speaker: 'gogole' }]);
                 }
             };
         };
     }
 
-    private showCertificateOverlay() {
-        // FIX: Cegah duplikat overlay
-        if (document.getElementById('certificate-overlay')) return;
-
-        const cert = document.createElement('div');
-        cert.id = 'certificate-overlay';
-        cert.style.cssText = `
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); display: flex; justify-content: center;
-            align-items: center; z-index: 11000;
-        `;
-        cert.innerHTML = `
-            <div style="width:600px;padding:40px;background:#fff;border:15px solid #4285F4;text-align:center;border-radius:10px;">
-                <h1 style="color:#4285F4;margin:0;">SERTIFIKAT</h1>
-                <p>Pahlawan Literasi Digital</p>
-                <div style="margin:20px 0;border-top:1px solid #ddd;padding-top:20px;">
-                    <h2 style="color:#DB4437;">${this.playerName}</h2>
-                    <p>Selamat atas keberhasilanmu menggunakan AI secara bijak!</p>
-                </div>
-                <button id="close-cert" style="background:#4285F4;color:#fff;border:none;padding:10px 30px;border-radius:5px;cursor:pointer;">
-                    Tutup
-                </button>
-            </div>
-        `;
-        document.body.appendChild(cert);
-
-        const closeBtn = cert.querySelector('#close-cert') as HTMLButtonElement;
-        closeBtn.onclick = () => {
-            if (document.body.contains(cert)) cert.remove();
-        };
-    }
+    // ── Dialog UI ──────────────────────────────────────────────────
 
     private createDialogUI() {
         this.gradientGraphics = this.add.graphics().setScrollFactor(0).setDepth(1001).setAlpha(0);
@@ -473,10 +494,11 @@ export class GeminiScene extends Phaser.Scene {
         this.dialogBox.add([bg, this.dialogText]);
     }
 
+    // ── Update Loop ────────────────────────────────────────────────
+
     update() {
         if (!this.playerContainer || !this.cursors) return;
 
-        // Cek exit conditions
         if (this.questState === 5 && this.playerContainer.x > 1880) {
             this.cleanupDOMOverlays();
             this.scene.start('MainScene');
@@ -506,12 +528,10 @@ export class GeminiScene extends Phaser.Scene {
         body.setVelocityX(vx * speed);
         body.setVelocityY(vy * speed);
 
-        // Depth sorting
         this.playerContainer.setDepth(9999);
         this.drGeminiNPC.setDepth(this.drGeminiNPC.y);
         this.smallRobots.forEach(robot => robot.setDepth(robot.y));
 
-        // Proximity checks
         const distDr = Phaser.Math.Distance.Between(
             this.playerContainer.x, this.playerContainer.y,
             this.drGeminiNPC.x, this.drGeminiNPC.y
@@ -524,47 +544,40 @@ export class GeminiScene extends Phaser.Scene {
         );
         this.isNearGreenTV = distTV < 150;
 
-        // FIX: Small robot proximity check
         this.activeRobot = null;
         for (const robot of this.smallRobots) {
             const distRobot = Phaser.Math.Distance.Between(
                 this.playerContainer.x, this.playerContainer.y,
                 robot.x, robot.y
             );
-            if (distRobot < 150) {
-                this.activeRobot = robot;
-                break;
-            }
+            if (distRobot < 150) { this.activeRobot = robot; break; }
         }
 
-        // FIX: interactPrompt posisi pakai worldToScreen yang benar tanpa kali zoom manual
         const cam = this.cameras.main;
         if (this.isNearDrGemini) {
-            const screenX = (this.drGeminiNPC.x - cam.scrollX);
-            const screenY = (this.drGeminiNPC.y - 120 - cam.scrollY);
-            this.interactPrompt.setText('[ENTER] Bicara').setPosition(screenX, screenY).setAlpha(1);
+            this.interactPrompt
+                .setText('[ENTER] Bicara')
+                .setPosition(this.drGeminiNPC.x - cam.scrollX, this.drGeminiNPC.y - 120 - cam.scrollY)
+                .setAlpha(1);
         } else if (this.isNearGreenTV && (this.questState === 1 || this.questState === 3)) {
-            const screenX = (750 - cam.scrollX);
-            const screenY = (520 - 120 - cam.scrollY);
-            this.interactPrompt.setText('[ENTER] Gunakan Gemini').setPosition(screenX, screenY).setAlpha(1);
+            this.interactPrompt
+                .setText('[ENTER] Gunakan Gemini')
+                .setPosition(750 - cam.scrollX, 520 - 120 - cam.scrollY)
+                .setAlpha(1);
         } else if (this.activeRobot) {
-            const screenX = (this.activeRobot.x - cam.scrollX);
-            const screenY = (this.activeRobot.y - 100 - cam.scrollY);
-            this.interactPrompt.setText('[ENTER] Sapa').setPosition(screenX, screenY).setAlpha(1);
+            this.interactPrompt
+                .setText('[ENTER] Sapa')
+                .setPosition(this.activeRobot.x - cam.scrollX, this.activeRobot.y - 100 - cam.scrollY)
+                .setAlpha(1);
         } else {
             this.interactPrompt.setAlpha(0);
         }
     }
 
-    // FIX: cleanup semua DOM overlay kalau scene di-shutdown
     private cleanupDOMOverlays() {
-        const geminiOverlay = document.getElementById('gemini-overlay');
-        if (geminiOverlay) geminiOverlay.remove();
-        const certOverlay = document.getElementById('certificate-overlay');
-        if (certOverlay) certOverlay.remove();
+        document.getElementById('gemini-overlay')?.remove();
     }
 
-    // Dipanggil Phaser saat scene di-shutdown
     shutdown() {
         this.cleanupDOMOverlays();
     }
