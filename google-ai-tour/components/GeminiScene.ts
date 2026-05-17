@@ -319,7 +319,7 @@ Kalimat: "${prompt}"`;
                 : "LITERASI: Jendela Masa Depan.\n\nSebagai penjaga pengetahuan, aku mengundangmu untuk membuka satu buku hari ini. Biarkan imajinasimu terbang melewati cakrawala berpikir yang tak terbatas. Ayo Membaca!";
         }
 
-        const result = await this.fetchGemini(prompt, 400);
+        const result = await this.fetchGemini(prompt, 700);
         if (!result) return "Maaf, koneksi ke Gemini terputus. Coba lagi nanti!";
         return result;
     }

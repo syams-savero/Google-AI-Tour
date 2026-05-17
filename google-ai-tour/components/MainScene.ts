@@ -12,6 +12,7 @@ export class MainScene extends Phaser.Scene {
     private barriers!: Phaser.Physics.Arcade.StaticGroup;
 
     private playerName: string = "User";
+    private hasTalkedToProfessor: boolean = false;
     private activeNPC: 'gogole' | 'professor' | null = null;
 
     private choiceButtons!: Phaser.GameObjects.Container;
@@ -283,6 +284,7 @@ export class MainScene extends Phaser.Scene {
                 // FIX [Major-5]: reset followup state saat selesai
                 this.isWaitingForFollowup = false;
                 this.followupIndex = 0;
+                this.hasTalkedToProfessor = true;
                 this.closeDialog();
             }
             return;
@@ -469,7 +471,13 @@ export class MainScene extends Phaser.Scene {
 
         // TRANSISI KE LANTAI 2 (GEMINI ROOM) - Harus di Paling Atas biar nggak kehalang 'return'
         if (this.playerContainer.x > 1850) {
-            this.scene.start('GeminiScene', { playerName: this.playerName });
+            if (this.hasTalkedToProfessor) {
+                this.scene.start('GeminiScene', { playerName: this.playerName });
+            } else {
+                // Cegah player lewat dan beri instruksi
+                this.playerContainer.x = 1840;
+                this.showDialog("Eitss, kamu harus ngobrol dulu sama Profesor sebelum lanjut ke Ruang Gemini!");
+            }
             return;
         }
 
