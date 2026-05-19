@@ -379,7 +379,7 @@ export class MainScene extends Phaser.Scene {
         this.tweens.add({ targets: this.gradientGraphics, alpha: 1, duration: 200 });
 
         if (this.activeNPC === 'gogole') {
-            this.portraitSprite.setTexture('gogole_portrait').setAlpha(1).setScale(6).setX(-600).setFlipX(false);
+            this.portraitSprite.setTexture('gogole_portrait').setAlpha(1).setScale(4.5).setX(-600).setFlipX(false);
             // FIX [Major-4]: sembunyikan profesor saat dialog Gogole
             this.professorNPC.setAlpha(0);
         } else {

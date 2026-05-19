@@ -18,5 +18,9 @@ export const phaserConfig: Phaser.Types.Core.GameConfig = {
         }
     },
     pixelArt: true,
+    audio: {
+        disableWebAudio: true,
+        noAudio: true
+    },
     backgroundColor: '#000000'
 };

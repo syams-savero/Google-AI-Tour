@@ -225,7 +225,7 @@ export class GeminiScene extends Phaser.Scene {
         this.tweens.add({ targets: this.gradientGraphics, alpha: 1, duration: 200 });
 
         if (speaker === 'gogole') {
-            this.portraitSprite.setTexture('gogole_portrait').setAlpha(1).setScale(6).setX(-600).setFlipX(false).setDepth(5);
+            this.portraitSprite.setTexture('gogole_portrait').setAlpha(1).setScale(4.5).setX(-600).setFlipX(false).setDepth(20005);
         } else if (speaker === 'dr_gemini') {
             const texture = (this.questState === 2) ? 'dr_gemini_bingung' : 'dr_gemini_portrait';
             this.portraitSprite.setTexture(texture).setAlpha(1).setScale(6).setX(600).setFlipX(false).setDepth(5);
