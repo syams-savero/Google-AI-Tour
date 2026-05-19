@@ -194,7 +194,10 @@ export class GeminiScene extends Phaser.Scene {
                 { text: `Kamu udah belajar cara prompt yang bener. Keren banget!`, speaker: 'dr_gemini' },
                 { text: `kamu bisa lanjut ke map selanjutnya ya, pintu disebelah kanan sudah terbuka`, speaker: 'dr_gemini' },
                 { text: `oke siap grak!`, speaker: 'gogole' }
-            ], () => { this.questState = 5; });
+            ], () => {
+                console.log("Quest Gemini Selesai! questState = 5. Silakan ke kanan map.");
+                this.questState = 5;
+            });
         }
     }
 
@@ -499,9 +502,9 @@ Kalimat: "${prompt}"`;
     update() {
         if (!this.playerContainer || !this.cursors) return;
 
-        if (this.questState === 5 && this.playerContainer.x > 1880) {
+        if (this.questState === 5 && this.playerContainer.x > 1850) {
             this.cleanupDOMOverlays();
-            this.scene.start('MainScene');
+            this.scene.start('Map3Scene', { playerName: this.playerName });
             return;
         }
         if (this.playerContainer.x < 40) {
