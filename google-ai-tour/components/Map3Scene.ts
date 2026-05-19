@@ -9,9 +9,16 @@ export class Map3Scene extends Phaser.Scene {
     private dialogBox!: Phaser.GameObjects.Container;
     private dialogText!: Phaser.GameObjects.Text;
     private interactPrompt!: Phaser.GameObjects.Text;
+
     private robotNano!: Phaser.GameObjects.Sprite;
     private robotTTS!: Phaser.GameObjects.Sprite;
     private robotStudio!: Phaser.GameObjects.Sprite;
+    private cleaningRobot!: Phaser.GameObjects.Sprite;
+
+    // Trashes
+    private trash1!: Phaser.GameObjects.Sprite;
+    private trash2!: Phaser.GameObjects.Sprite;
+    private trash3!: Phaser.GameObjects.Sprite;
 
     private playerName: string = "User";
 
@@ -26,7 +33,20 @@ export class Map3Scene extends Phaser.Scene {
     preload() {
         this.load.image('bg3', '/assets/Map3.png');
         this.load.image('player_robot', '/assets/gogole.png');
-        this.load.image('npc_robot', '/assets/robotGemini.png');
+
+        // NPC Assets baru dari kamu
+        this.load.image('nano_asset', '/assets/robotBanana.png');
+        this.load.image('tts_asset', '/assets/robotTTS.png');
+        this.load.image('studio_asset', '/assets/robotAiStudio.png');
+
+        // Trash Assets
+        this.load.image('trash_foto', '/assets/sampahFoto.png');
+        this.load.image('trash_kertas', '/assets/sampahKertas.png');
+        this.load.image('trash_minuman', '/assets/sampahMinuman.png');
+
+        // Cleaner Bot (Untuk nanti)
+        this.load.image('cleaner_back', '/assets/robotPembersihHadapBelakang.png');
+        this.load.image('cleaner_side', '/assets/robotPembersihHadapSamping.png');
     }
 
     create() {
@@ -35,8 +55,8 @@ export class Map3Scene extends Phaser.Scene {
         this.physics.world.setBounds(0, 0, 1920, 1080);
         this.cameras.main.setBounds(0, 0, 1920, 1080);
 
-        // Player Container (Spawn di sebelah kiri pintu masuk)
-        this.playerContainer = this.add.container(200, 800);
+        // Player (Spawn posisi masuk)
+        this.playerContainer = this.add.container(150, 800);
         this.physics.world.enable(this.playerContainer);
         this.playerSprite = this.add.sprite(0, 0, 'player_robot');
         this.playerContainer.add(this.playerSprite);
@@ -47,7 +67,7 @@ export class Map3Scene extends Phaser.Scene {
 
         this.cameras.main.startFollow(this.playerContainer, true, 0.1, 0.1);
 
-        // Floating Effect for Player
+        // Floating Effect Player
         this.tweens.add({
             targets: this.playerSprite,
             y: '-=15',
@@ -55,13 +75,13 @@ export class Map3Scene extends Phaser.Scene {
             yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
         });
 
-        // 3 Robot Stands (Visual Placement Only)
-        // Posisi ini bisa kamu kabari kalau mau geser
-        this.robotNano = this.add.sprite(480, 520, 'npc_robot').setScale(1.2).setDepth(520);   // Stand 1
-        this.robotTTS = this.add.sprite(960, 520, 'npc_robot').setScale(1.2).setDepth(520);    // Stand 2
-        this.robotStudio = this.add.sprite(1440, 520, 'npc_robot').setScale(1.2).setDepth(520); // Stand 3
+        // --- PLACING ROBOTS (Shifted to Right) ---
+        // Stand 1: Nano (600, 520)
+        this.robotNano = this.add.sprite(530, 510, 'nano_asset').setScale(0.32).setDepth(510);
+        this.robotTTS = this.add.sprite(1150, 520, 'tts_asset').setScale(0.3).setDepth(520);
+        this.robotStudio = this.add.sprite(1780, 520, 'studio_asset').setScale(0.4).setDepth(520);
 
-        // Floating Effect for NPCs
+        // NPC Effects
         [this.robotNano, this.robotTTS, this.robotStudio].forEach((robot, i) => {
             this.tweens.add({
                 targets: robot,
@@ -71,23 +91,28 @@ export class Map3Scene extends Phaser.Scene {
             });
         });
 
-        // Setup Controls
+        // --- PLACING TRASHES ---
+        this.trash1 = this.add.sprite(700, 850, 'trash_foto').setScale(0.6).setDepth(850);
+        this.trash2 = this.add.sprite(1200, 700, 'trash_kertas').setScale(0.4).setDepth(700);
+        this.trash3 = this.add.sprite(1500, 900, 'trash_minuman').setScale(0.6).setDepth(900);
+
+        // --- PLACING CLEANER ROBOT (Corner) ---
+        this.cleaningRobot = this.add.sprite(1800, 900, 'cleaner_side').setScale(1.0).setDepth(900);
+
+        // Controls
         if (this.input.keyboard) {
             this.cursors = this.input.keyboard.createCursorKeys();
         }
 
-        console.log(`Map 3 Ready! Player: ${this.playerName}`);
+        console.log("Map 3 Updated with new Assets & Positions!");
     }
 
     update() {
         if (!this.playerContainer || !this.cursors) return;
 
-        // No Reverse Rule (Nggak bisa balik ke Map 2 sebelah kiri)
-        if (this.playerContainer.x < 100) {
-            this.playerContainer.x = 100;
-        }
+        // No Reverse Rule
+        if (this.playerContainer.x < 100) this.playerContainer.x = 100;
 
-        // Logic Gerakan Player
         const body = this.playerContainer.body as Phaser.Physics.Arcade.Body;
         body.setVelocity(0);
 
@@ -102,6 +127,6 @@ export class Map3Scene extends Phaser.Scene {
         body.setVelocityX(vx * speed);
         body.setVelocityY(vy * speed);
 
-        this.playerContainer.setDepth(this.playerContainer.y);
+        this.playerContainer.setDepth(9999);
     }
 }
