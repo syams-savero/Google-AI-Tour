@@ -25,7 +25,7 @@ export class Map3Scene extends Phaser.Scene {
     private barriers!: Phaser.Physics.Arcade.StaticGroup;
 
     // Quest & Dialog States
-    private questStep: number = 0; 
+    private questStep: number = 0;
     private selectedTheme: 'Evolusi' | 'Inovasi' | null = null;
     private isDialogActive: boolean = false;
     private isTyping: boolean = false;
@@ -173,13 +173,17 @@ export class Map3Scene extends Phaser.Scene {
     }
 
     private handleChoice(choice: 'Evolusi' | 'Inovasi') {
-        this.selectedTheme = choice;
-        this.choiceButtons.setAlpha(0);
-        this.startSequence([
-            { text: `Okee jadi kamu pilih ${choice} ya, gas yuk kita buat!`, speaker: 'nano' }
-        ], () => {
-            this.showGeminiInterface();
-        });
+        if (this.questStep === 0) {
+            this.selectedTheme = choice;
+            this.choiceButtons.setAlpha(0);
+            this.startSequence([
+                { text: `Okee jadi kamu pilih ${choice} ya, gas yuk kita buat!`, speaker: 'nano' }
+            ], () => {
+                this.showGeminiInterface();
+            });
+        } else if (this.questStep === 2) {
+            this.handleStudioChoice(choice);
+        }
     }
 
     private async showGeminiInterface() {
@@ -430,6 +434,141 @@ Dari petualangan sejarah ini, kita belajar satu hal: manusia bisa bertahan dan m
         };
     }
 
+    private startStudioQuest() {
+        this.startSequence([
+            { text: `Haloo...`, speaker: 'gogole' },
+            { text: `Haloo selamat datang di Google AI Studio!`, speaker: 'studio' },
+            { text: `Ini apa ya? keliatannya canggih sepertinya..`, speaker: 'gogole' },
+            { text: `Aku adalah Google AI Studio, ini memang canggih banget!`, speaker: 'studio' },
+            { text: `Emangnya bisa apa aja?`, speaker: 'gogole' },
+            { text: `Banyakk, kamu bisa aku bantu untuk menjadi teman untuk belajar, mencari tau informasi terbaru, analisa sesuatu, coding, hingga membangun banyak hal dalam dunia digital.`, speaker: 'studio' },
+            { text: `Contohnya game yang sedang kamu mainkan saat ini itu buatan Google AI Studio lohh... keren kan?`, speaker: 'studio' },
+            { text: `Wah keren juga ya! Tapi pasti ribet cara pakainya..`, speaker: 'gogole' },
+            { text: `Sama sekali tidak, Google AI Studio ini sudah dirancang agar sangat mudah untuk digunakan, mau coba?`, speaker: 'studio' },
+            { text: `Boleh tuh!`, speaker: 'gogole' },
+            { text: `Mantap! Sekarang coba lihat di sekeliling ruangan ini. Kira-kira masalah apa yang bisa diselesaikan?`, speaker: 'studio' }
+        ], () => {
+            this.showStudioChoices();
+        });
+    }
+
+    private showStudioChoices() {
+        this.choiceButtons.setAlpha(1);
+        const btnEvo = this.choiceButtons.list[0] as Phaser.GameObjects.Container;
+        const btnIno = this.choiceButtons.list[1] as Phaser.GameObjects.Container;
+        (btnEvo.list[1] as Phaser.GameObjects.Text).setText('BINGUNG');
+        (btnIno.list[1] as Phaser.GameObjects.Text).setText('SAMPAH');
+        this.selectedChoice = 'Evolusi'; // Treat as 1st button
+        this.updateChoiceSelection('Evolusi');
+    }
+
+    private handleStudioChoice(choice: string) {
+        this.choiceButtons.setAlpha(0);
+        const introText = choice === 'Evolusi'
+            ? `Coba lihat lantai pada ruangan ini, ada banyak sampah bukan? Itu dia masalah yang bisa kita selesaikan.`
+            : `Ya! Benar sekali. Itu adalah masalah yang bisa kita selesaikan bersama.`;
+
+        this.startSequence([
+            { text: introText, speaker: 'studio' },
+            { text: `Ayo kita selesaikan masalah ini bersama, mudah kok kamu cukup prompt untuk robot pembersih sampah di sana aja biar dia mau bergerak untuk bersihin sampahnya.`, speaker: 'studio' }
+        ], () => {
+            this.showGeminiStudioInterface();
+        });
+    }
+
+    private async showGeminiStudioInterface() {
+        if (document.getElementById('gemini-overlay')) return;
+        const draftStudio = `role : kamu adalah game developer yang terbiasa membuat game interaktif
+
+goals : menggerakan robot pembersih sampah agar bisa membersihkan sampah di ruangan ini
+
+context : membuat ruangan menjadi lebih bersih dan game menjadi lebih interaktif
+
+vibe : robotnya akan bergerak cukup kencang dan efisien dalam membersihkan sampahnya`;
+
+        const overlay = document.createElement('div');
+        overlay.id = 'gemini-overlay';
+        overlay.style.cssText = `position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:flex;justify-content:center;align-items:center;z-index:99999;font-family:sans-serif;`;
+        overlay.innerHTML = `
+            <div style="width:820px;background:#131314;border-radius:24px;border:1px solid #333;display:flex;flex-direction:column;overflow:hidden;">
+                <div style="padding:20px;border-bottom:1px solid #333;display:flex;align-items:center;justify-content:space-between;">
+                    <span style="color:#fff;font-size:24px;font-weight:600;">Google AI Studio</span>
+                </div>
+                <div id="chat-area" style="height:350px;padding:20px;overflow-y:auto;color:#fff;">
+                    <div style="background:#1a1a2e;border:1px solid #9B72CB;border-radius:12px;padding:20px;margin-bottom:16px;">
+                        <div style="color:#9B72CB;font-weight:bold;margin-bottom:10px;">📋 CONTOH PROMPT:</div>
+                        <div style="color:#ccc;font-size:13px;line-height:1.6;background:#000;padding:15px;border-radius:8px;border:1px dashed #444;white-space:pre-wrap;">${draftStudio}</div>
+                    </div>
+                </div>
+                <div style="padding:20px;background:#1e1f20;display:flex;gap:10px;">
+                    <input id="gemini-input" placeholder="Tulis prompt untuk robot pembersih..." style="flex:1;background:#131314;border:1px solid #333;color:#fff;padding:12px 20px;border-radius:100px;outline:none;">
+                    <button id="submit-btn" style="background:#9B72CB;color:#fff;border:none;padding:10px 40px;border-radius:100px;cursor:pointer;font-weight:bold;">Kirim</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        const input = document.getElementById('gemini-input') as HTMLInputElement;
+        const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+        input.focus();
+        input.onkeydown = (e) => { if (e.key === 'Enter') submitBtn.click(); };
+        submitBtn.onclick = () => {
+            const val = input.value.toLowerCase();
+            if (!val.includes('robot') && !val.includes('bersih')) {
+                alert('Prompt invalid! Pastikan berkaitan dengan robot pembersih sampah.');
+                return;
+            }
+            this.questStep = 2.5; // Prevent re-triggering during cleaning
+            overlay.remove();
+            this.startCleaningSequence();
+        };
+    }
+
+    private startCleaningSequence() {
+        // Move to Trash 3 (1500, 900)
+        this.tweens.add({
+            targets: this.cleaningRobot,
+            x: 1500, y: 900, duration: 800,
+            onComplete: () => {
+                if (this.trash3) this.trash3.destroy();
+                // Move to Trash 1 line (y=850) then to (700, 850)
+                this.tweens.add({
+                    targets: this.cleaningRobot,
+                    x: 700, y: 850, duration: 1500,
+                    onComplete: () => {
+                        if (this.trash1) this.trash1.destroy();
+                        // Move to Trash 2 line (y=700) then to (1200, 700)
+                        this.tweens.add({
+                            targets: this.cleaningRobot,
+                            x: 1200, y: 700, duration: 1000,
+                            onComplete: () => {
+                                if (this.trash2) this.trash2.destroy();
+                                // Park near AI Studio - Lowered to Y:800 to avoid overlapping stand
+                                this.tweens.add({
+                                    targets: this.cleaningRobot,
+                                    x: 1700, y: 800, duration: 1000,
+                                    onComplete: () => {
+                                        this.time.delayedCall(500, () => {
+                                            this.startSequence([
+                                                { text: `Woah, cepet banget!`, speaker: 'gogole' },
+                                                { text: `Tuh mudah bukan? Inilah kekuatan dari AI Studio!`, speaker: 'studio' },
+                                                { text: `Canggih banget yaa..`, speaker: 'gogole' },
+                                                { text: `Betul! Dan sepertinya kamu sudah cukup paham dengan beberapa tools dari Google ini.`, speaker: 'studio' },
+                                                { text: `Setelah ini, di ruang selanjutnya ada hal yang menarik loh.`, speaker: 'studio' },
+                                                { text: `Gasss yuk lanjut ke ruang selanjutnya!`, speaker: 'studio' }
+                                            ], () => {
+                                                this.questStep = 3;
+                                            });
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+
     private startSequence(seq: any[], onComplete?: () => void) {
         this.dialogSequence = seq;
         this.currentDialogIndex = 0;
@@ -465,6 +604,8 @@ Dari petualangan sejarah ini, kita belajar satu hal: manusia bisa bertahan dan m
             this.portraitSprite.setTexture('player_robot').setAlpha(1).setScale(4.5).setX(-600).setFlipX(true).setDepth(20010);
         } else if (speaker === 'tts') {
             this.portraitSprite.setTexture('tts_asset').setAlpha(1).setScale(0.8).setX(600).setFlipX(false).setDepth(20010);
+        } else if (speaker === 'studio') {
+            this.portraitSprite.setTexture('studio_asset').setAlpha(1).setScale(0.8).setX(600).setFlipX(false).setDepth(20010);
         } else { this.portraitSprite.setAlpha(0); }
         if (this.typeTimer) this.typeTimer.remove();
         let charIndex = 0;
@@ -485,8 +626,11 @@ Dari petualangan sejarah ini, kita belajar satu hal: manusia bisa bertahan dan m
     private handleProximityInteraction() {
         const distNano = Phaser.Math.Distance.Between(this.playerContainer.x, this.playerContainer.y, this.robotNano.x, this.robotNano.y);
         const distTTS = Phaser.Math.Distance.Between(this.playerContainer.x, this.playerContainer.y, this.robotTTS.x, this.robotTTS.y);
+        const distStudio = Phaser.Math.Distance.Between(this.playerContainer.x, this.playerContainer.y, this.robotStudio.x, this.robotStudio.y);
+
         if (distNano < 150 && this.questStep === 0) this.startNanoQuest();
         else if (distTTS < 150 && this.questStep === 1) this.startTTSQuest();
+        else if (distStudio < 150 && this.questStep === 2) this.startStudioQuest();
     }
 
     update() {
@@ -507,11 +651,15 @@ Dari petualangan sejarah ini, kita belajar satu hal: manusia bisa bertahan dan m
         this.playerContainer.setDepth(9999);
         const distNano = Phaser.Math.Distance.Between(this.playerContainer.x, this.playerContainer.y, this.robotNano.x, this.robotNano.y);
         const distTTS = Phaser.Math.Distance.Between(this.playerContainer.x, this.playerContainer.y, this.robotTTS.x, this.robotTTS.y);
+        const distStudio = Phaser.Math.Distance.Between(this.playerContainer.x, this.playerContainer.y, this.robotStudio.x, this.robotStudio.y);
         const cam = this.cameras.main;
+
         if (distNano < 150 && this.questStep === 0) {
             this.interactPrompt.setText('[ENTER] Nano Banana').setPosition(this.robotNano.x - cam.scrollX, this.robotNano.y - 150 - cam.scrollY).setAlpha(1);
         } else if (distTTS < 150 && this.questStep === 1) {
             this.interactPrompt.setText('[ENTER] TTS Stand').setPosition(this.robotTTS.x - cam.scrollX, this.robotTTS.y - 150 - cam.scrollY).setAlpha(1);
+        } else if (distStudio < 150 && this.questStep === 2) {
+            this.interactPrompt.setText('[ENTER] Google AI Studio').setPosition(this.robotStudio.x - cam.scrollX, this.robotStudio.y - 150 - cam.scrollY).setAlpha(1);
         } else { this.interactPrompt.setAlpha(0); }
     }
 }
