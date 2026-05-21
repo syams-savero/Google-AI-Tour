@@ -276,7 +276,10 @@ Suasana: Edukatif, inspiratif, penuh informasi, teratur, dan menunjukkan kontras
         const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
         const chatArea = document.getElementById('chat-area') as HTMLDivElement;
         input.focus();
-        input.onkeydown = (e) => { if (e.key === 'Enter') submitBtn.click(); };
+        input.onkeydown = (e) => {
+            e.stopPropagation();
+            if (e.key === 'Enter') submitBtn.click();
+        };
         submitBtn.onclick = async () => {
             const prompt = input.value.trim();
             if (!prompt) return;
@@ -389,7 +392,10 @@ Dari petualangan sejarah ini, kita belajar satu hal: manusia bisa bertahan dan m
         const chatArea = document.getElementById('chat-area') as HTMLDivElement;
 
         input.focus();
-        input.onkeydown = (e: KeyboardEvent) => { if (e.key === 'Enter') submitBtn.click(); };
+        input.onkeydown = (e: KeyboardEvent) => {
+            e.stopPropagation();
+            if (e.key === 'Enter') submitBtn.click();
+        };
 
         submitBtn.onclick = () => {
             submitBtn.disabled = true;
@@ -510,7 +516,10 @@ vibe : robotnya akan bergerak cukup kencang dan efisien dalam membersihkan sampa
         const input = document.getElementById('gemini-input') as HTMLInputElement;
         const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
         input.focus();
-        input.onkeydown = (e) => { if (e.key === 'Enter') submitBtn.click(); };
+        input.onkeydown = (e) => {
+            e.stopPropagation();
+            if (e.key === 'Enter') submitBtn.click();
+        };
         submitBtn.onclick = () => {
             const val = input.value.toLowerCase();
             if (!val.includes('robot') && !val.includes('bersih')) {

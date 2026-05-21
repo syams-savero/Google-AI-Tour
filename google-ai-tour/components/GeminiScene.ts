@@ -323,7 +323,12 @@ Kalimat: "${prompt}"`;
         }
 
         const result = await this.fetchGemini(prompt, 700);
-        if (!result) return "Maaf, koneksi ke Gemini terputus. Coba lagi nanti!";
+        if (!result) {
+            // Fallback jika API Limit/High Demand — Agar User tetap bisa lanjut quest
+            return (this.questState === 1)
+                ? "Membaca adalah jendela dunia. Literasi yang baik membantu kita memahami informasi dengan lebih bijak dan kritis di era digital ini."
+                : "[SIMULATED RESPONSE] LITERASI: Kekuatan Masa Depan.\n\nDalam dunia yang terus berubah, literasi adalah kunci untuk beradaptasi. Mari kita budayakan membaca untuk memperluas cakrawala berpikir kita semua!";
+        }
         return result;
     }
 
@@ -402,7 +407,10 @@ Kalimat: "${prompt}"`;
         };
 
         closeBtn.onclick = cleanupOverlay;
-        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitBtn.click(); });
+        input.addEventListener('keydown', (e) => {
+            e.stopPropagation(); // Mencegah Phaser 'memakan' input keyboard (seperti spasi)
+            if (e.key === 'Enter') submitBtn.click();
+        });
         setTimeout(() => input.focus(), 100);
 
         submitBtn.onclick = async () => {
