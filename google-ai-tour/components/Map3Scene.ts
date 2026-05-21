@@ -414,7 +414,7 @@ Dari petualangan sejarah ini, kita belajar satu hal: manusia bisa bertahan dan m
                    <span style="font-size:24px;">🔊</span>
                    <span style="color:#4285F4;font-weight:bold;">Playing: Background Narration...</span>
                 </div>
-                <button id="res-btn" style="padding:15px 40px;background:#fff;color:#000;border:none;border-radius:100px;font-weight:bold;cursor:pointer;">Dengar Lagi / Lanjut</button>
+                <button id="res-btn" style="padding:15px 40px;background:#fff;color:#000;border:none;border-radius:100px;font-weight:bold;cursor:pointer;">Lanjut</button>
             </div>
         `;
         document.body.appendChild(overlay);
