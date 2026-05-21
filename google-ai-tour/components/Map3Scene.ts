@@ -663,6 +663,12 @@ vibe : robotnya akan bergerak cukup kencang dan efisien dalam membersihkan sampa
         const distStudio = Phaser.Math.Distance.Between(this.playerContainer.x, this.playerContainer.y, this.robotStudio.x, this.robotStudio.y);
         const cam = this.cameras.main;
 
+        // Transition to Map 4
+        if (this.questStep === 3 && this.playerContainer.x > 1850) {
+            this.scene.start('Map4Scene', { playerName: this.playerName });
+            return;
+        }
+
         if (distNano < 150 && this.questStep === 0) {
             this.interactPrompt.setText('[ENTER] Nano Banana').setPosition(this.robotNano.x - cam.scrollX, this.robotNano.y - 150 - cam.scrollY).setAlpha(1);
         } else if (distTTS < 150 && this.questStep === 1) {

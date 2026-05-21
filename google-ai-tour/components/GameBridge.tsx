@@ -5,6 +5,7 @@ import { phaserConfig } from './PhaserConfig';
 import { MainScene } from './MainScene';
 import { GeminiScene } from './GeminiScene';
 import { Map3Scene } from './Map3Scene';
+import { Map4Scene } from './Map4Scene';
 
 export default function GameBridge() {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -16,7 +17,7 @@ export default function GameBridge() {
         const config = {
             ...phaserConfig,
             parent: containerRef.current,
-            scene: [MainScene, GeminiScene, Map3Scene]
+            scene: [MainScene, GeminiScene, Map3Scene, Map4Scene]
         };
 
         gameRef.current = new Phaser.Game(config);
