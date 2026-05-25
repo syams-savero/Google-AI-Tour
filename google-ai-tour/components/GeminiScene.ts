@@ -232,7 +232,7 @@ export class GeminiScene extends Phaser.Scene {
         this.tweens.add({ targets: this.gradientGraphics, alpha: 1, duration: 200 });
 
         if (speaker === 'gogole') {
-            this.portraitSprite.setTexture('gogole_portrait').setAlpha(1).setScale(4.5).setX(-600).setFlipX(false).setDepth(20005);
+            this.portraitSprite.setTexture('gogole_portrait').setAlpha(1).setScale(4.5).setX(-600).setY(80).setFlipX(false).setDepth(20005);
         } else if (speaker === 'dr_gemini') {
             const texture = (this.questState === 2) ? 'dr_gemini_bingung' : 'dr_gemini_portrait';
             this.portraitSprite.setTexture(texture).setAlpha(1).setScale(6).setX(600).setFlipX(false).setDepth(5);
@@ -326,15 +326,15 @@ Kalimat: "${prompt}"`;
         if (!this.GEMINI_API_KEY) {
             return (this.questState === 1)
                 ? "Buku adalah gudang ilmu, membaca adalah kuncinya. Literasi itu penting agar kita pintar."
-                : "LITERASI: Jendela Masa Depan.\n\nSebagai penjaga pengetahuan, aku mengundangmu untuk membuka satu buku hari ini. Biarkan imajinasimu terbang melewati cakrawala berpikir yang tak terbatas. Ayo Membaca!";
+                : "LITERASI: Jendela Masa Depan\n\nBuku adalah teman setia yang membuka pintu ke dunia penuh kemungkinan. Membaca bukan hanya sekadar mengeja kata-kata, tetapi sebuah petualangan yang mengubah cara kita berpikir dan memahami dunia.\n\nLiterasi adalah kekuatan nyata. Dengan membaca, kita belajar, tumbuh, dan berkembang. Ayo wujudkan impian dengan membaca lebih banyak setiap hari! Bersama-sama kita bisa mengubah masa depan melalui kekuatan literasi.";
         }
 
-        const result = await this.fetchGemini(prompt, 700);
+        const result = await this.fetchGemini(prompt, 1500);
         if (!result) {
             // Fallback jika API Limit/High Demand — Agar User tetap bisa lanjut quest
             return (this.questState === 1)
                 ? "Membaca adalah jendela dunia. Literasi yang baik membantu kita memahami informasi dengan lebih bijak dan kritis di era digital ini."
-                : "[SIMULATED RESPONSE] LITERASI: Kekuatan Masa Depan.\n\nDalam dunia yang terus berubah, literasi adalah kunci untuk beradaptasi. Mari kita budayakan membaca untuk memperluas cakrawala berpikir kita semua!";
+                : "LITERASI: Jendela Masa Depan\n\nBuku adalah teman setia yang membuka pintu ke dunia penuh kemungkinan. Membaca bukan hanya sekadar mengeja kata-kata, tetapi sebuah petualangan yang mengubah cara kita berpikir dan memahami dunia.\n\nLiterasi adalah kekuatan nyata. Dengan membaca, kita belajar, tumbuh, dan berkembang. Ayo wujudkan impian dengan membaca lebih banyak setiap hari! Bersama-sama kita bisa mengubah masa depan melalui kekuatan literasi.";
         }
         return result;
     }
@@ -501,7 +501,7 @@ Kalimat: "${prompt}"`;
         this.gradientGraphics.fillRect(0, 720, 1920, 360);
 
         this.dialogBox = this.add.container(960, 920).setScrollFactor(0).setAlpha(0).setDepth(1002);
-        this.portraitSprite = this.add.sprite(-600, -320, 'dr_gemini_portrait').setScale(6).setAlpha(0);
+        this.portraitSprite = this.add.sprite(-600, 80, 'dr_gemini_portrait').setScale(6).setAlpha(0);
         this.dialogBox.add(this.portraitSprite);
 
         const bg = this.add.rectangle(0, 0, 1500, 220, 0x000000, 0.9).setStrokeStyle(4, 0x4285F4);
