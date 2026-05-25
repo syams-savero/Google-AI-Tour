@@ -232,10 +232,12 @@ export class GeminiScene extends Phaser.Scene {
         this.tweens.add({ targets: this.gradientGraphics, alpha: 1, duration: 200 });
 
         if (speaker === 'gogole') {
-            this.portraitSprite.setTexture('gogole_portrait').setAlpha(1).setScale(4.5).setX(-600).setY(80).setFlipX(false).setDepth(20005);
+            // Match MainScene: only change texture, alpha, scale, X and flip.
+            // Do NOT modify Y or depth so it stays aligned with the dialog container.
+            this.portraitSprite.setTexture('gogole_portrait').setAlpha(1).setScale(4.5).setX(-600).setFlipX(false);
         } else if (speaker === 'dr_gemini') {
             const texture = (this.questState === 2) ? 'dr_gemini_bingung' : 'dr_gemini_portrait';
-            this.portraitSprite.setTexture(texture).setAlpha(1).setScale(6).setX(600).setFlipX(false).setDepth(5);
+            this.portraitSprite.setTexture(texture).setAlpha(1).setScale(6).setX(600).setFlipX(false);
         } else {
             this.portraitSprite.setAlpha(0);
         }
@@ -496,18 +498,20 @@ Kalimat: "${prompt}"`;
     // ── Dialog UI ──────────────────────────────────────────────────
 
     private createDialogUI() {
-        this.gradientGraphics = this.add.graphics().setScrollFactor(0).setDepth(1001).setAlpha(0);
+        // Match dialog UI with MainScene for consistency across maps
+        this.gradientGraphics = this.add.graphics().setScrollFactor(0).setDepth(999).setAlpha(0);
         this.gradientGraphics.fillGradientStyle(0x000000, 0x000000, 0x000000, 0x000000, 0, 0, 0.85, 0.85);
         this.gradientGraphics.fillRect(0, 720, 1920, 360);
 
-        this.dialogBox = this.add.container(960, 920).setScrollFactor(0).setAlpha(0).setDepth(1002);
-        this.portraitSprite = this.add.sprite(-600, 80, 'dr_gemini_portrait').setScale(6).setAlpha(0);
+        this.dialogBox = this.add.container(960, 920).setScrollFactor(0).setAlpha(0).setDepth(1000);
+        // Use same portrait placement/scale as MainScene so it doesn't drop below
+        this.portraitSprite = this.add.sprite(-600, -320, 'dr_gemini_portrait').setScale(6).setAlpha(0);
         this.dialogBox.add(this.portraitSprite);
 
-        const bg = this.add.rectangle(0, 0, 1500, 220, 0x000000, 0.9).setStrokeStyle(4, 0x4285F4);
+        const bg = this.add.rectangle(0, 0, 1500, 220, 0x000000, 0.8).setStrokeStyle(4, 0x4285F4);
         this.dialogText = this.add.text(0, 0, '', {
-            fontSize: '32px', color: '#ffffff',
-            wordWrap: { width: 1300 }, fontStyle: 'bold'
+            fontSize: '42px', color: '#ffffff',
+            wordWrap: { width: 1380, useAdvancedWrap: true }, fontStyle: 'bold'
         }).setOrigin(0.5);
         this.dialogBox.add([bg, this.dialogText]);
     }
@@ -546,7 +550,11 @@ Kalimat: "${prompt}"`;
         body.setVelocityX(vx * speed);
         body.setVelocityY(vy * speed);
 
-        this.playerContainer.setDepth(9999);
+        // Depth sorting: samakan logika dengan MainScene (player vs NPC)
+        if (this.playerContainer.y > this.drGeminiNPC.y)
+            this.playerContainer.setDepth(this.drGeminiNPC.depth + 1);
+        else
+            this.playerContainer.setDepth(this.drGeminiNPC.depth - 1);
         this.drGeminiNPC.setDepth(this.drGeminiNPC.y);
         this.smallRobots.forEach(robot => robot.setDepth(robot.y));
 
