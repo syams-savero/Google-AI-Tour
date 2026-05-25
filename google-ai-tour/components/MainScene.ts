@@ -1,4 +1,5 @@
 import * as Phaser from 'phaser';
+import { AudioManager } from './AudioManager';
 
 export class MainScene extends Phaser.Scene {
     private playerContainer!: Phaser.GameObjects.Container;
@@ -67,6 +68,9 @@ export class MainScene extends Phaser.Scene {
         this.load.image('player_robot', '/assets/gogole.png');
         this.load.image('professor', '/assets/profesor.png');
         this.load.image('gogole_portrait', '/assets/gogoleSapa.png');
+        if (!this.cache.audio.exists('bgm')) {
+            this.load.audio('bgm', '/assets/Pixel Quest Parade.mp3');
+        }
     }
 
     create() {
@@ -97,6 +101,9 @@ export class MainScene extends Phaser.Scene {
         body.setOffset(-40, -40);
 
         this.cameras.main.startFollow(this.playerContainer, true, 0.1, 0.1);
+
+        AudioManager.init(this);
+        AudioManager.playMusic(this);
 
         // Efek Melayang (Hanya pada Sprite-nya saja)
         this.tweens.add({
@@ -340,7 +347,7 @@ export class MainScene extends Phaser.Scene {
         this.isWaitingForChoice = false;
 
         let response = choice === 'ya'
-            ? "Wah peka juga ya kamu, kita akan jalan-jalan di kantor ini sambil liat-liat teknologi AI terbaru loh!"
+            ? "Benar!, kita akan jalan-jalan di kantor ini sambil liat-liat teknologi AI terbaru loh!"
             : "Ah iya sih wajar kalau belum tau, jadi kita disini akan jalan-jalan buat liat-liat perkembangan teknologi AI terbaru dari google loh. Terdengar asik bukan?";
         this.showDialog(response);
         this.time.delayedCall(2000, () => {

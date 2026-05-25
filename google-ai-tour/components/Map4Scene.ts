@@ -1,4 +1,5 @@
 import * as Phaser from 'phaser';
+import { AudioManager } from './AudioManager';
 
 export class Map4Scene extends Phaser.Scene {
     private playerContainer!: Phaser.GameObjects.Container;
@@ -35,6 +36,9 @@ export class Map4Scene extends Phaser.Scene {
         this.load.image('robot_ending', '/assets/robotEnding.png');
         this.load.image('player_robot', '/assets/gogole.png');
         this.load.image('gogole_portrait', '/assets/gogoleSapa.png');
+        if (!this.cache.audio.exists('bgm')) {
+            this.load.audio('bgm', '/assets/Pixel Quest Parade.mp3');
+        }
     }
 
     create() {
@@ -59,6 +63,10 @@ export class Map4Scene extends Phaser.Scene {
         this.playerContainer = this.add.container(200, 550);
         this.playerContainer.setDepth(10000);
         this.physics.world.enable(this.playerContainer);
+
+        AudioManager.init(this);
+        AudioManager.setActiveScene(this.scene.key);
+        AudioManager.stopMusic();
 
         this.playerSprite = this.add.sprite(0, 0, 'player_robot').setScale(1.0);
         this.playerContainer.add(this.playerSprite);

@@ -1,4 +1,5 @@
 import * as Phaser from 'phaser';
+import { AudioManager } from './AudioManager';
 
 export class Map3Scene extends Phaser.Scene {
     private playerContainer!: Phaser.GameObjects.Container;
@@ -60,6 +61,9 @@ export class Map3Scene extends Phaser.Scene {
         this.load.image('trash_minuman', '/assets/sampahMinuman.png');
         this.load.image('cleaner_back', '/assets/robotPembersihHadapBelakang.png');
         this.load.image('cleaner_side', '/assets/robotPembersihHadapSamping.png');
+        if (!this.cache.audio.exists('bgm')) {
+            this.load.audio('bgm', '/assets/Pixel Quest Parade.mp3');
+        }
     }
 
     create() {
@@ -77,6 +81,9 @@ export class Map3Scene extends Phaser.Scene {
 
         // Kamera Fixed ala Map 1 & konsisten ke Map 3
         this.cameras.main.centerOn(960, 540);
+
+        AudioManager.init(this);
+        AudioManager.playMusic(this);
 
         this.barriers = this.physics.add.staticGroup();
         this.barriers.add(this.add.rectangle(960, 440, 1920, 80, 0x0000ff, 0));
@@ -425,9 +432,19 @@ Dari petualangan sejarah ini, kita belajar satu hal: manusia bisa bertahan dan m
         `;
         document.body.appendChild(overlay);
         const audio = new Audio(`/assets/${audioFile}`);
+        AudioManager.pauseForMaterial();
+        let hasFinished = false;
+        const finishMaterialAudio = () => {
+            if (hasFinished) return;
+            hasFinished = true;
+            AudioManager.materialAudioFinished();
+        };
         audio.play();
+        audio.addEventListener('ended', finishMaterialAudio);
         document.getElementById('res-btn')!.onclick = () => {
-            audio.pause(); overlay.remove();
+            audio.pause();
+            finishMaterialAudio();
+            overlay.remove();
             this.startSequence([
                 { text: `wahh beneran bisa, dengan gini bisa enak dong belajar sendiri dirumah`, speaker: 'gogole' },
                 { text: `Benar sekali, kamu bisa bebas bikin ilustrasi mengenai pelajaran mu dan juga ada penjelasanya seperti guru di sekolah mengajar!`, speaker: 'tts' },

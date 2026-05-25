@@ -1,4 +1,5 @@
 import * as Phaser from 'phaser';
+import { AudioManager } from './AudioManager';
 
 export class GeminiScene extends Phaser.Scene {
     private playerContainer!: Phaser.GameObjects.Container;
@@ -53,6 +54,9 @@ export class GeminiScene extends Phaser.Scene {
         this.load.image('robot_mini', '/assets/robotGemini.png');
         this.load.image('dr_gemini_portrait', '/assets/DrGemini.png');
         this.load.image('dr_gemini_bingung', '/assets/DrGeminiBingung.png');
+        if (!this.cache.audio.exists('bgm')) {
+            this.load.audio('bgm', '/assets/Pixel Quest Parade.mp3');
+        }
     }
 
     create() {
@@ -71,6 +75,9 @@ export class GeminiScene extends Phaser.Scene {
         body.setSize(80, 80).setOffset(-40, -40);
 
         this.cameras.main.startFollow(this.playerContainer, true, 0.1, 0.1);
+
+        AudioManager.init(this);
+        AudioManager.playMusic(this);
 
         this.tweens.add({
             targets: this.playerSprite,
