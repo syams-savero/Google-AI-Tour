@@ -385,14 +385,14 @@ export class MainScene extends Phaser.Scene {
         this.choiceButtons = this.add.container(960, 750).setAlpha(0).setDepth(2000).setScrollFactor(0);
 
         this.btnYa = this.add.text(-250, 0, ' [ YA ] ', {
-            fontSize: '48px', backgroundColor: '#0F9D58', padding: { x: 30, y: 15 }, fontStyle: 'bold'
+            fontSize: '48px', backgroundColor: '#0F9D58', padding: { x: 30, y: 15 }, fontStyle: 'bold', fontFamily: 'Outfit'
         }).setOrigin(0.5).setInteractive({ useHandCursor: true }).on('pointerdown', () => {
             AudioManager.playClick(this);
             this.handleChoice('ya');
         });
 
         this.btnTidak = this.add.text(250, 0, ' [ TIDAK ] ', {
-            fontSize: '48px', backgroundColor: '#DB4437', padding: { x: 30, y: 15 }, fontStyle: 'bold'
+            fontSize: '48px', backgroundColor: '#DB4437', padding: { x: 30, y: 15 }, fontStyle: 'bold', fontFamily: 'Outfit'
         }).setOrigin(0.5).setInteractive({ useHandCursor: true }).on('pointerdown', () => {
             AudioManager.playClick(this);
             this.handleChoice('tidak');
@@ -500,7 +500,8 @@ export class MainScene extends Phaser.Scene {
         this.dialogText = this.add.text(0, 0, '', {
             fontSize: '42px', color: '#ffffff',
             wordWrap: { width: 1380, useAdvancedWrap: true },
-            fontStyle: 'bold'
+            fontStyle: 'bold',
+            fontFamily: 'Outfit'
         }).setOrigin(0.5);
         this.dialogBox.add([bg, this.dialogText]);
     }
