@@ -9,7 +9,7 @@ export class Map4Scene extends Phaser.Scene {
     private playerName: string = 'User';
 
     private robotEnding!: Phaser.GameObjects.Sprite;
-    private interactPrompt!: Phaser.GameObjects.Text;
+    private interactPrompt!: Phaser.GameObjects.Image;
 
     // UI Elements (Standar Map 3)
     private dialogBox!: Phaser.GameObjects.Container;
@@ -40,6 +40,7 @@ export class Map4Scene extends Phaser.Scene {
         if (!this.cache.audio.exists('bgm')) {
             this.load.audio('bgm', '/assets/Pixel Quest Parade.mp3');
         }
+        this.load.image('interaksi_btn', '/assets/interaksi.png');
         this.load.audio('click', '/assets/click.mp3');
     }
 
@@ -94,9 +95,20 @@ export class Map4Scene extends Phaser.Scene {
         // 4. UI Setup
         this.createDialogUI();
 
-        this.interactPrompt = this.add.text(0, 0, '[ENTER] Bicara', {
-            fontSize: '24px', color: '#ffffff', backgroundColor: '#4285F4', padding: { x: 15, y: 8 }, fontStyle: 'bold'
-        }).setOrigin(0.5).setAlpha(0).setDepth(20000).setScrollFactor(0);
+        this.interactPrompt = this.add.image(0, 0, 'interaksi_btn')
+            .setOrigin(0.5)
+            .setScale(0.08)
+            .setAlpha(0)
+            .setDepth(20000);
+
+        this.tweens.add({
+            targets: this.interactPrompt,
+            scale: 0.1,
+            duration: 600,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
 
         if (this.input.keyboard) {
             this.cursors = this.input.keyboard.createCursorKeys();
@@ -262,9 +274,9 @@ export class Map4Scene extends Phaser.Scene {
 
         const dist = Phaser.Math.Distance.Between(this.playerContainer.x, this.playerContainer.y, this.robotEnding.x, this.robotEnding.y);
         if (dist < 200 && !this.isReadyForExit) {
-            this.interactPrompt.setAlpha(1).setPosition(this.robotEnding.x, this.robotEnding.y - 120).setText('[ENTER] Bicara');
+            this.interactPrompt.setAlpha(1).setPosition(this.robotEnding.x, this.robotEnding.y - 150);
         } else if (this.isReadyForExit && this.playerContainer.x > 1550) {
-            this.interactPrompt.setAlpha(1).setPosition(1570, 430).setText('[ENTER] Masuk');
+            this.interactPrompt.setAlpha(1).setPosition(1570, 380);
         } else {
             this.interactPrompt.setAlpha(0);
         }

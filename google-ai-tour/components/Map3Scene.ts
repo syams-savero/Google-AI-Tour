@@ -12,7 +12,7 @@ export class Map3Scene extends Phaser.Scene {
     private dialogText!: Phaser.GameObjects.Text;
     private portraitSprite!: Phaser.GameObjects.Sprite;
     private gradientGraphics!: Phaser.GameObjects.Graphics;
-    private interactPrompt!: Phaser.GameObjects.Text;
+    private interactPrompt!: Phaser.GameObjects.Image;
 
     private robotNano!: Phaser.GameObjects.Sprite;
     private robotTTS!: Phaser.GameObjects.Sprite;
@@ -62,6 +62,7 @@ export class Map3Scene extends Phaser.Scene {
         this.load.image('trash_minuman', '/assets/sampahMinuman.png');
         this.load.image('cleaner_back', '/assets/robotPembersihHadapBelakang.png');
         this.load.image('cleaner_side', '/assets/robotPembersihHadapSamping.png');
+        this.load.image('interaksi_btn', '/assets/interaksi.png');
         this.load.audio('click', '/assets/click.mp3');
         if (!this.cache.audio.exists('bgm')) {
             this.load.audio('bgm', '/assets/Pixel Quest Parade.mp3');
@@ -115,9 +116,20 @@ export class Map3Scene extends Phaser.Scene {
         this.createDialogUI();
         this.createChoiceButtons();
 
-        this.interactPrompt = this.add.text(0, 0, '[ENTER]', {
-            fontSize: '24px', color: '#ffffff', backgroundColor: '#4285F4', padding: { x: 12, y: 6 }, fontStyle: 'bold'
-        }).setOrigin(0.5).setAlpha(0).setDepth(20000).setScrollFactor(0);
+        this.interactPrompt = this.add.image(0, 0, 'interaksi_btn')
+            .setOrigin(0.5)
+            .setScale(0.08)
+            .setAlpha(0)
+            .setDepth(20000);
+
+        this.tweens.add({
+            targets: this.interactPrompt,
+            scale: 0.1,
+            duration: 600,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
 
         if (this.input.keyboard) {
             this.cursors = this.input.keyboard.createCursorKeys();
@@ -705,11 +717,11 @@ vibe : robotnya akan bergerak cukup kencang dan efisien dalam membersihkan sampa
         }
 
         if (distNano < 150 && this.questStep === 0) {
-            this.interactPrompt.setText('[ENTER] Nano Banana').setPosition(this.robotNano.x - cam.scrollX, this.robotNano.y - 150 - cam.scrollY).setAlpha(1);
+            this.interactPrompt.setPosition(this.robotNano.x, this.robotNano.y - 180).setAlpha(1);
         } else if (distTTS < 150 && this.questStep === 1) {
-            this.interactPrompt.setText('[ENTER] TTS Stand').setPosition(this.robotTTS.x - cam.scrollX, this.robotTTS.y - 150 - cam.scrollY).setAlpha(1);
+            this.interactPrompt.setPosition(this.robotTTS.x, this.robotTTS.y - 180).setAlpha(1);
         } else if (distStudio < 150 && this.questStep === 2) {
-            this.interactPrompt.setText('[ENTER] Google AI Studio').setPosition(this.robotStudio.x - cam.scrollX, this.robotStudio.y - 150 - cam.scrollY).setAlpha(1);
+            this.interactPrompt.setPosition(this.robotStudio.x, this.robotStudio.y - 180).setAlpha(1);
         } else { this.interactPrompt.setAlpha(0); }
     }
 }

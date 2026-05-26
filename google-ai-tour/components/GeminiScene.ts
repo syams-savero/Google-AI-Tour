@@ -11,7 +11,7 @@ export class GeminiScene extends Phaser.Scene {
     private gradientGraphics!: Phaser.GameObjects.Graphics;
     private dialogText!: Phaser.GameObjects.Text;
     private barriers!: Phaser.Physics.Arcade.StaticGroup;
-    private interactPrompt!: Phaser.GameObjects.Text;
+    private interactPrompt!: Phaser.GameObjects.Image;
     private smallRobots: Phaser.GameObjects.Sprite[] = [];
     private drGeminiNPC!: Phaser.GameObjects.Sprite;
     private activeRobot: any = null;
@@ -55,6 +55,7 @@ export class GeminiScene extends Phaser.Scene {
         this.load.image('robot_mini', '/assets/robotGemini.png');
         this.load.image('dr_gemini_portrait', '/assets/DrGemini.png');
         this.load.image('dr_gemini_bingung', '/assets/DrGeminiBingung.png');
+        this.load.image('interaksi_btn', '/assets/interaksi.png');
         this.load.audio('click', '/assets/click.mp3');
         if (!this.cache.audio.exists('bgm')) {
             this.load.audio('bgm', '/assets/Pixel Quest Parade.mp3');
@@ -123,9 +124,20 @@ export class GeminiScene extends Phaser.Scene {
 
         this.createDialogUI();
 
-        this.interactPrompt = this.add.text(0, 0, '[ENTER]', {
-            fontSize: '20px', color: '#ffffff', backgroundColor: '#4285F4', padding: { x: 10, y: 5 }
-        }).setOrigin(0.5).setAlpha(0).setDepth(2000).setScrollFactor(0);
+        this.interactPrompt = this.add.image(0, 0, 'interaksi_btn')
+            .setOrigin(0.5)
+            .setScale(0.08)
+            .setAlpha(0)
+            .setDepth(2000);
+
+        this.tweens.add({
+            targets: this.interactPrompt,
+            scale: 0.1,
+            duration: 600,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
 
         if (this.input.keyboard) {
             this.cursors = this.input.keyboard.createCursorKeys();
@@ -585,22 +597,12 @@ Kalimat: "${prompt}"`;
             if (distRobot < 150) { this.activeRobot = robot; break; }
         }
 
-        const cam = this.cameras.main;
         if (this.isNearDrGemini) {
-            this.interactPrompt
-                .setText('[ENTER] Bicara')
-                .setPosition(this.drGeminiNPC.x - cam.scrollX, this.drGeminiNPC.y - 120 - cam.scrollY)
-                .setAlpha(1);
+            this.interactPrompt.setPosition(this.drGeminiNPC.x, this.drGeminiNPC.y - 180).setAlpha(1);
         } else if (this.isNearGreenTV && (this.questState === 1 || this.questState === 3)) {
-            this.interactPrompt
-                .setText('[ENTER] Gunakan Gemini')
-                .setPosition(750 - cam.scrollX, 520 - 120 - cam.scrollY)
-                .setAlpha(1);
+            this.interactPrompt.setPosition(750, 520 - 170).setAlpha(1);
         } else if (this.activeRobot) {
-            this.interactPrompt
-                .setText('[ENTER] Sapa')
-                .setPosition(this.activeRobot.x - cam.scrollX, this.activeRobot.y - 100 - cam.scrollY)
-                .setAlpha(1);
+            this.interactPrompt.setPosition(this.activeRobot.x, this.activeRobot.y - 140).setAlpha(1);
         } else {
             this.interactPrompt.setAlpha(0);
         }

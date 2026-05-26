@@ -28,7 +28,7 @@ export class MainScene extends Phaser.Scene {
     ];
 
     private isNearProfessor: boolean = false;
-    private interactPrompt!: Phaser.GameObjects.Text;
+    private interactPrompt!: Phaser.GameObjects.Image;
     private isDialogActive: boolean = false;
     private currentDialogIndex: number = 0;
 
@@ -69,6 +69,7 @@ export class MainScene extends Phaser.Scene {
         this.load.image('player_robot', '/assets/gogole.png');
         this.load.image('professor', '/assets/profesor.png');
         this.load.image('gogole_portrait', '/assets/gogoleSapa.png');
+        this.load.image('interaksi_btn', '/assets/interaksi.png');
         this.load.audio('click', '/assets/click.mp3');
         if (!this.cache.audio.exists('bgm')) {
             this.load.audio('bgm', '/assets/Pixel Quest Parade.mp3');
@@ -137,9 +138,20 @@ export class MainScene extends Phaser.Scene {
 
         // FIX [Major-3]: interactPrompt pakai setScrollFactor(0) agar
         // posisinya di screen-space, tidak ikut kamera bergerak
-        this.interactPrompt = this.add.text(0, 0, '[ENTER] Bicara', {
-            fontSize: '20px', color: '#ffffff', backgroundColor: '#4285F4', padding: { x: 10, y: 5 }
-        }).setOrigin(0.5).setAlpha(0).setDepth(2000).setScrollFactor(0);
+        this.interactPrompt = this.add.image(0, 0, 'interaksi_btn')
+            .setOrigin(0.5)
+            .setScale(0.08)
+            .setAlpha(0)
+            .setDepth(2000);
+
+        this.tweens.add({
+            targets: this.interactPrompt,
+            scale: 0.1,
+            duration: 600,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
 
         if (this.input.keyboard) {
             this.cursors = this.input.keyboard.createCursorKeys();
@@ -365,7 +377,7 @@ export class MainScene extends Phaser.Scene {
         this.time.delayedCall(2000, () => {
             this.isWaitingForFollowup = true;
             this.followupIndex = 0;
-            this.interactPrompt.setAlpha(1).setText('[ENTER] Lanjut');
+            this.interactPrompt.setAlpha(1);
         });
     }
 
@@ -551,25 +563,12 @@ export class MainScene extends Phaser.Scene {
             this.isNearProfessor = nowNearProfessor;
             if (nowNearProfessor) {
                 if (!this.isDialogActive) {
-                    // FIX [Major-3]: posisi prompt di screen-space
-                    // konversi world → screen dengan kamera
-                    const cam = this.cameras.main;
-                    const sx = (this.professorNPC.x - cam.scrollX) * cam.zoom;
-                    const sy = (this.professorNPC.y - 120 - cam.scrollY) * cam.zoom;
-                    this.interactPrompt.setPosition(sx, sy).setAlpha(1).setText('[ENTER] Bicara');
+                    this.interactPrompt.setPosition(this.professorNPC.x, this.professorNPC.y - 150).setAlpha(1);
                 }
             } else {
                 if (this.activeNPC === 'professor') this.closeDialog();
                 this.interactPrompt.setAlpha(0);
             }
-        }
-
-        // Update posisi prompt setiap frame saat dekat (agar tetap mengikuti)
-        if (nowNearProfessor && !this.isDialogActive && this.interactPrompt.alpha > 0) {
-            const cam = this.cameras.main;
-            const sx = (this.professorNPC.x - cam.scrollX) * cam.zoom;
-            const sy = (this.professorNPC.y - 120 - cam.scrollY) * cam.zoom;
-            this.interactPrompt.setPosition(sx, sy);
         }
     }
 
