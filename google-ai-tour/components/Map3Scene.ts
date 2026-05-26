@@ -61,6 +61,7 @@ export class Map3Scene extends Phaser.Scene {
         this.load.image('trash_minuman', '/assets/sampahMinuman.png');
         this.load.image('cleaner_back', '/assets/robotPembersihHadapBelakang.png');
         this.load.image('cleaner_side', '/assets/robotPembersihHadapSamping.png');
+        this.load.audio('click', '/assets/click.mp3');
         if (!this.cache.audio.exists('bgm')) {
             this.load.audio('bgm', '/assets/Pixel Quest Parade.mp3');
         }
@@ -147,12 +148,20 @@ export class Map3Scene extends Phaser.Scene {
         this.choiceButtons = this.add.container(960, 600).setScrollFactor(0).setAlpha(0).setDepth(10000);
         const btnEvo = this.add.container(-250, 0);
         const btnIno = this.add.container(250, 0);
-        const bgEvo = this.add.rectangle(0, 0, 400, 100, 0x333333, 0.9).setStrokeStyle(4, 0x4285F4).setName('bg');
+        const bgEvo = this.add.rectangle(0, 0, 400, 100, 0x333333, 0.9).setStrokeStyle(4, 0x4285F4).setName('bg').setInteractive({ useHandCursor: true });
         const txtEvo = this.add.text(0, 0, 'EVOLUSI', { fontSize: '40px', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5);
         btnEvo.add([bgEvo, txtEvo]);
-        const bgIno = this.add.rectangle(0, 0, 400, 100, 0x333333, 0.9).setStrokeStyle(4, 0xffffff).setName('bg');
+        const bgIno = this.add.rectangle(0, 0, 400, 100, 0x333333, 0.9).setStrokeStyle(4, 0xffffff).setName('bg').setInteractive({ useHandCursor: true });
         const txtIno = this.add.text(0, 0, 'INOVASI', { fontSize: '40px', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5);
         btnIno.add([bgIno, txtIno]);
+        bgEvo.on('pointerdown', () => {
+            AudioManager.playClick(this);
+            this.handleChoice('Evolusi');
+        });
+        bgIno.on('pointerdown', () => {
+            AudioManager.playClick(this);
+            this.handleChoice('Inovasi');
+        });
         this.choiceButtons.add([btnEvo, btnIno]);
     }
 
@@ -331,6 +340,7 @@ Suasana: Edukatif, inspiratif, penuh informasi, teratur, dan menunjukkan kontras
         `;
         document.body.appendChild(overlay);
         document.getElementById('res-btn')!.onclick = () => {
+            AudioManager.playClick(this);
             overlay.remove();
             this.startSequence([
                 { text: `Keren kan.. dengan begini kamu bisa lebih mudah untuk belajar.`, speaker: 'nano' },
@@ -405,6 +415,7 @@ Dari petualangan sejarah ini, kita belajar satu hal: manusia bisa bertahan dan m
         };
 
         submitBtn.onclick = () => {
+            AudioManager.playClick(this);
             submitBtn.disabled = true;
             chatArea.innerHTML += `<div style="margin-top:16px;color:#4285F4;font-weight:bold;">Sistem:</div><div style="margin-top:4px;color:#ccc;">Memproses suara menggunakan Google TTS...</div>`;
             chatArea.scrollTop = chatArea.scrollHeight;
@@ -442,6 +453,7 @@ Dari petualangan sejarah ini, kita belajar satu hal: manusia bisa bertahan dan m
         audio.play();
         audio.addEventListener('ended', finishMaterialAudio);
         document.getElementById('res-btn')!.onclick = () => {
+            AudioManager.playClick(this);
             audio.pause();
             finishMaterialAudio();
             overlay.remove();
@@ -538,6 +550,7 @@ vibe : robotnya akan bergerak cukup kencang dan efisien dalam membersihkan sampa
             if (e.key === 'Enter') submitBtn.click();
         };
         submitBtn.onclick = () => {
+            AudioManager.playClick(this);
             const val = input.value.toLowerCase();
             if (!val.includes('robot') && !val.includes('bersih')) {
                 alert('Prompt invalid! Pastikan berkaitan dengan robot pembersih sampah.');
@@ -621,6 +634,7 @@ vibe : robotnya akan bergerak cukup kencang dan efisien dalam membersihkan sampa
         this.isDialogActive = true;
         this.fullText = text;
         this.dialogText.setText('');
+        AudioManager.playClick(this);
         this.isTyping = true;
         this.tweens.add({ targets: this.dialogBox, alpha: 1, duration: 200 });
         this.tweens.add({ targets: this.gradientGraphics, alpha: 1, duration: 200 });

@@ -39,6 +39,7 @@ export class Map4Scene extends Phaser.Scene {
         if (!this.cache.audio.exists('bgm')) {
             this.load.audio('bgm', '/assets/Pixel Quest Parade.mp3');
         }
+        this.load.audio('click', '/assets/click.mp3');
     }
 
     create() {
@@ -200,6 +201,7 @@ export class Map4Scene extends Phaser.Scene {
         this.isDialogActive = true;
         this.fullText = text;
         this.dialogText.setText('');
+        AudioManager.playClick(this);
         this.isTyping = true;
         this.tweens.add({ targets: [this.dialogBox, this.gradientGraphics], alpha: 1, duration: 200 });
 

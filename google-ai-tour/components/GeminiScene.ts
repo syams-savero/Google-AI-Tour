@@ -54,6 +54,7 @@ export class GeminiScene extends Phaser.Scene {
         this.load.image('robot_mini', '/assets/robotGemini.png');
         this.load.image('dr_gemini_portrait', '/assets/DrGemini.png');
         this.load.image('dr_gemini_bingung', '/assets/DrGeminiBingung.png');
+        this.load.audio('click', '/assets/click.mp3');
         if (!this.cache.audio.exists('bgm')) {
             this.load.audio('bgm', '/assets/Pixel Quest Parade.mp3');
         }
@@ -227,6 +228,7 @@ export class GeminiScene extends Phaser.Scene {
         this.isDialogActive = true;
         this.fullText = text;
         this.dialogText.setText('');
+        AudioManager.playClick(this);
         this.isTyping = true;
         this.tweens.add({ targets: this.dialogBox, alpha: 1, duration: 200 });
         this.tweens.add({ targets: this.gradientGraphics, alpha: 1, duration: 200 });
@@ -423,6 +425,7 @@ Kalimat: "${prompt}"`;
         setTimeout(() => input.focus(), 100);
 
         submitBtn.onclick = async () => {
+            AudioManager.playClick(this);
             const prompt = input.value.trim();
             if (!prompt) return;
 
@@ -483,6 +486,7 @@ Kalimat: "${prompt}"`;
 
             const reportBtn = overlay.querySelector('#report-btn') as HTMLButtonElement;
             reportBtn.onclick = () => {
+                AudioManager.playClick(this);
                 cleanupOverlay();
                 if (this.questState === 1) {
                     this.questState = 2;

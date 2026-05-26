@@ -2,6 +2,7 @@ import * as Phaser from 'phaser';
 
 export class AudioManager {
     private static bgm: Phaser.Sound.BaseSound | null = null;
+    private static clickSound: Phaser.Sound.BaseSound | null = null;
     private static materialAudioCount = 0;
     private static activeSceneKey: string | null = null;
 
@@ -30,6 +31,11 @@ export class AudioManager {
         } else if (!this.bgm.isPlaying) {
             this.bgm.play();
         }
+    }
+
+    static playClick(scene: Phaser.Scene) {
+        if (!scene.cache.audio.exists('click')) return;
+        scene.sound.play('click', { volume: 1.0 });
     }
 
     static pauseMusic() {

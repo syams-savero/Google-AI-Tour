@@ -68,6 +68,7 @@ export class MainScene extends Phaser.Scene {
         this.load.image('player_robot', '/assets/gogole.png');
         this.load.image('professor', '/assets/profesor.png');
         this.load.image('gogole_portrait', '/assets/gogoleSapa.png');
+        this.load.audio('click', '/assets/click.mp3');
         if (!this.cache.audio.exists('bgm')) {
             this.load.audio('bgm', '/assets/Pixel Quest Parade.mp3');
         }
@@ -362,11 +363,17 @@ export class MainScene extends Phaser.Scene {
 
         this.btnYa = this.add.text(-250, 0, ' [ YA ] ', {
             fontSize: '48px', backgroundColor: '#0F9D58', padding: { x: 30, y: 15 }, fontStyle: 'bold'
-        }).setOrigin(0.5).setInteractive({ useHandCursor: true }).on('pointerdown', () => this.handleChoice('ya'));
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true }).on('pointerdown', () => {
+            AudioManager.playClick(this);
+            this.handleChoice('ya');
+        });
 
         this.btnTidak = this.add.text(250, 0, ' [ TIDAK ] ', {
             fontSize: '48px', backgroundColor: '#DB4437', padding: { x: 30, y: 15 }, fontStyle: 'bold'
-        }).setOrigin(0.5).setInteractive({ useHandCursor: true }).on('pointerdown', () => this.handleChoice('tidak'));
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true }).on('pointerdown', () => {
+            AudioManager.playClick(this);
+            this.handleChoice('tidak');
+        });
 
         this.choiceButtons.add([this.btnYa, this.btnTidak]);
     }
@@ -374,6 +381,8 @@ export class MainScene extends Phaser.Scene {
     private showDialog(text: string) {
         this.fullText = text;
         this.dialogText.setText('');
+
+        AudioManager.playClick(this);
 
         // FIX [Critical-2]: batalkan timer lama sepenuhnya sebelum mulai baru
         if (this.typeTimer) {
