@@ -5,6 +5,7 @@ export class GeminiScene extends Phaser.Scene {
     private playerContainer!: Phaser.GameObjects.Container;
     private playerSprite!: Phaser.GameObjects.Sprite;
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+    private wasdKeys!: { W: Phaser.Input.Keyboard.Key; A: Phaser.Input.Keyboard.Key; S: Phaser.Input.Keyboard.Key; D: Phaser.Input.Keyboard.Key; };
     private dialogBox!: Phaser.GameObjects.Container;
     private portraitSprite!: Phaser.GameObjects.Sprite;
     private gradientGraphics!: Phaser.GameObjects.Graphics;
@@ -128,6 +129,7 @@ export class GeminiScene extends Phaser.Scene {
 
         if (this.input.keyboard) {
             this.cursors = this.input.keyboard.createCursorKeys();
+            this.wasdKeys = this.input.keyboard.addKeys('W,A,S,D') as any;
             this.input.keyboard.on('keydown-ENTER', () => {
                 if (this.isTyping) {
                     this.completeTypewriter();
@@ -545,10 +547,10 @@ Kalimat: "${prompt}"`;
         let vx = 0;
         let vy = 0;
 
-        if (this.cursors.left.isDown) { vx = -1; this.playerSprite.setFlipX(true); }
-        else if (this.cursors.right.isDown) { vx = 1; this.playerSprite.setFlipX(false); }
-        if (this.cursors.up.isDown) vy = -1;
-        else if (this.cursors.down.isDown) vy = 1;
+        if (this.cursors.left.isDown || this.wasdKeys.A.isDown) { vx = -1; this.playerSprite.setFlipX(true); }
+        else if (this.cursors.right.isDown || this.wasdKeys.D.isDown) { vx = 1; this.playerSprite.setFlipX(false); }
+        if (this.cursors.up.isDown || this.wasdKeys.W.isDown) vy = -1;
+        else if (this.cursors.down.isDown || this.wasdKeys.S.isDown) vy = 1;
 
         if (vx !== 0 && vy !== 0) { const norm = Math.SQRT1_2; vx *= norm; vy *= norm; }
         body.setVelocityX(vx * speed);

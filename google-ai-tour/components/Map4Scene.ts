@@ -5,6 +5,7 @@ export class Map4Scene extends Phaser.Scene {
     private playerContainer!: Phaser.GameObjects.Container;
     private playerSprite!: Phaser.GameObjects.Sprite;
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+    private wasdKeys!: { W: Phaser.Input.Keyboard.Key; A: Phaser.Input.Keyboard.Key; S: Phaser.Input.Keyboard.Key; D: Phaser.Input.Keyboard.Key; };
     private playerName: string = 'User';
 
     private robotEnding!: Phaser.GameObjects.Sprite;
@@ -99,6 +100,7 @@ export class Map4Scene extends Phaser.Scene {
 
         if (this.input.keyboard) {
             this.cursors = this.input.keyboard.createCursorKeys();
+            this.wasdKeys = this.input.keyboard.addKeys('W,A,S,D') as any;
             this.input.keyboard.on('keydown-ENTER', () => {
                 if (this.isTyping) {
                     this.completeTypewriter();
@@ -250,8 +252,8 @@ export class Map4Scene extends Phaser.Scene {
 
         const speed = 500;
         let vx = 0;
-        if (this.cursors.left.isDown) { vx = -1; this.playerSprite.setFlipX(true); }
-        else if (this.cursors.right.isDown) { vx = 1; this.playerSprite.setFlipX(false); }
+        if (this.cursors.left.isDown || this.wasdKeys.A.isDown) { vx = -1; this.playerSprite.setFlipX(true); }
+        else if (this.cursors.right.isDown || this.wasdKeys.D.isDown) { vx = 1; this.playerSprite.setFlipX(false); }
 
         body.setVelocityX(vx * speed);
         body.setVelocityY(0); // Ensure Y velocity is always 0

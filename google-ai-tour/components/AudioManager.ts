@@ -9,7 +9,7 @@ export class AudioManager {
     static init(scene: Phaser.Scene) {
         if (this.bgm) return;
         if (scene.cache.audio.exists('bgm')) {
-            this.bgm = scene.sound.add('bgm', { loop: true, volume: 0.5 });
+            this.bgm = scene.sound.add('bgm', { loop: true, volume: 0.2 });
         }
     }
 
@@ -23,7 +23,7 @@ export class AudioManager {
             return;
         }
         if (!this.bgm && scene.cache.audio.exists('bgm')) {
-            this.bgm = scene.sound.add('bgm', { loop: true, volume: 0.5 });
+            this.bgm = scene.sound.add('bgm', { loop: true, volume: 0.2 });
         }
         if (!this.bgm || this.materialAudioCount > 0) return;
         if (this.bgm.isPaused) {

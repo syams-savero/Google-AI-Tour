@@ -42,6 +42,7 @@ export class MainScene extends Phaser.Scene {
     // FIX [Critical-1]: flag & UI untuk input nama (ganti window.prompt)
     private nameInputOverlay!: HTMLDivElement;
     private isWaitingForName: boolean = false;
+    private wasdKeys!: { W: Phaser.Input.Keyboard.Key; A: Phaser.Input.Keyboard.Key; S: Phaser.Input.Keyboard.Key; D: Phaser.Input.Keyboard.Key; };
 
     private gogoleDialogs: string[] = [
         "Haloo! Nama kamu siapa?",
@@ -142,6 +143,7 @@ export class MainScene extends Phaser.Scene {
 
         if (this.input.keyboard) {
             this.cursors = this.input.keyboard.createCursorKeys();
+            this.wasdKeys = this.input.keyboard.addKeys('W,A,S,D') as any;
             this.input.keyboard.on('keydown-ENTER', () => {
                 // FIX [Major-2]: jangan proses ENTER jika sedang input nama
                 if (this.isWaitingForName) return;
@@ -168,6 +170,12 @@ export class MainScene extends Phaser.Scene {
                 if (this.choiceButtons.alpha > 0) this.updateChoiceSelection('ya');
             });
             this.input.keyboard.on('keydown-RIGHT', () => {
+                if (this.choiceButtons.alpha > 0) this.updateChoiceSelection('tidak');
+            });
+            this.input.keyboard.on('keydown-A', () => {
+                if (this.choiceButtons.alpha > 0) this.updateChoiceSelection('ya');
+            });
+            this.input.keyboard.on('keydown-D', () => {
                 if (this.choiceButtons.alpha > 0) this.updateChoiceSelection('tidak');
             });
         }
@@ -245,9 +253,12 @@ export class MainScene extends Phaser.Scene {
 
         btn.addEventListener('click', submit);
         input.addEventListener('keydown', (e) => {
+            e.stopPropagation(); // Mencegah Phaser menangkap WASD/Enter
             if (e.key === 'Enter') submit();
             errMsg.textContent = '';
         });
+        input.addEventListener('keyup', (e) => e.stopPropagation());
+        input.addEventListener('keypress', (e) => e.stopPropagation());
 
         box.appendChild(label);
         box.appendChild(input);
@@ -506,10 +517,10 @@ export class MainScene extends Phaser.Scene {
         let vx = 0;
         let vy = 0;
 
-        if (this.cursors.left.isDown) { vx = -1; this.playerSprite.setFlipX(true); }
-        else if (this.cursors.right.isDown) { vx = 1; this.playerSprite.setFlipX(false); }
-        if (this.cursors.up.isDown) vy = -1;
-        else if (this.cursors.down.isDown) vy = 1;
+        if (this.cursors.left.isDown || this.wasdKeys.A.isDown) { vx = -1; this.playerSprite.setFlipX(true); }
+        else if (this.cursors.right.isDown || this.wasdKeys.D.isDown) { vx = 1; this.playerSprite.setFlipX(false); }
+        if (this.cursors.up.isDown || this.wasdKeys.W.isDown) vy = -1;
+        else if (this.cursors.down.isDown || this.wasdKeys.S.isDown) vy = 1;
 
         if (vx !== 0 && vy !== 0) {
             // Normalisasi vektor diagonal agar kecepatan tetap = speed
