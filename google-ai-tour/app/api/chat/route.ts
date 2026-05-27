@@ -4,8 +4,13 @@ import { NextResponse } from "next/server";
 const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || "");
 
 export async function POST(req: Request) {
+    let userPrompt: string = "";
     try {
-        const { userPrompt } = await req.json();
+        const body = await req.json();
+        if (!body?.userPrompt || typeof body.userPrompt !== "string") {
+            return NextResponse.json({ error: "Missing userPrompt" }, { status: 400 });
+        }
+        userPrompt = body.userPrompt;
 
         // MENGGUNAKAN MODEL TERBARU 2026: GEMINI 3.5 FLASH
         const model = genAI.getGenerativeModel({
@@ -35,7 +40,7 @@ export async function POST(req: Request) {
         // Fallback ke Gemini 3.1 Pro jika 3.5 masi preview/limit
         try {
             const fallbackModel = genAI.getGenerativeModel({ model: "gemini-3.1-pro" });
-            const result = await fallbackModel.generateContent(userPrompt);
+            const result = await fallbackModel.generateContent(userPrompt ?? "");
             return NextResponse.json({ text: result.response.text() });
         } catch {
             return NextResponse.json({ error: "All frontier models failed" }, { status: 500 });
