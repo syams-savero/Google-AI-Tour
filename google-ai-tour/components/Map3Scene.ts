@@ -464,7 +464,7 @@ Dari petualangan sejarah ini, kita belajar satu hal: manusia bisa bertahan dan m
         const finishMaterialAudio = () => {
             if (hasFinished) return;
             hasFinished = true;
-            AudioManager.materialAudioFinished();
+            AudioManager.resumeAfterMaterial();
         };
         audio.play();
         audio.addEventListener('ended', finishMaterialAudio);

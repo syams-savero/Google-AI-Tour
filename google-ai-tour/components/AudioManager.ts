@@ -46,4 +46,17 @@ export class AudioManager {
             this.bgm.stop();
         }
     }
+
+    // Fungsi baru untuk dipanggil saat ada materi audio (TTS/TV)
+    static pauseForMaterial() {
+        if (this.bgm && this.bgm.isPlaying) {
+            this.bgm.pause();
+        }
+    }
+
+    static resumeAfterMaterial() {
+        if (this.bgm && this.bgm.isPaused) {
+            this.bgm.resume();
+        }
+    }
 }
