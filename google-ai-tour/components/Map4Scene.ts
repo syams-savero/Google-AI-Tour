@@ -180,10 +180,101 @@ export class Map4Scene extends Phaser.Scene {
     }
 
     private triggerFinalRedirect() {
-        // Fade to white
-        this.cameras.main.fadeOut(2000, 255, 255, 255);
-        this.cameras.main.once('camerafadeoutcomplete', () => {
-            window.location.href = 'https://aistudio.google.com/';
+        // Create full screen overlay
+        const overlay = this.add.graphics();
+        overlay.fillStyle(0x0f172a, 1);
+        overlay.fillRect(0, 0, 1920, 1080);
+        overlay.setDepth(30000);
+        overlay.setAlpha(0);
+
+        // Ambient dark fade-in transition
+        this.tweens.add({
+            targets: overlay,
+            alpha: 1,
+            duration: 1500,
+            onComplete: () => {
+                // Container for ending elements
+                const endContainer = this.add.container(960, 500).setDepth(30100).setAlpha(0);
+
+                // Gogole icon floating
+                const logo = this.add.sprite(0, -180, 'player_robot').setScale(1.5);
+                endContainer.add(logo);
+                this.tweens.add({
+                    targets: logo,
+                    y: '-=15',
+                    duration: 1500,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
+
+                // Title
+                const title = this.add.text(0, -50, 'Selamat! Kamu telah menyelesaikan Google AI Tour 🎉', {
+                    fontFamily: 'system-ui, -apple-system, sans-serif',
+                    fontSize: '44px',
+                    color: '#ffffff',
+                    align: 'center',
+                    fontStyle: 'bold'
+                }).setOrigin(0.5);
+                endContainer.add(title);
+
+                // Subtitle
+                const sub = this.add.text(0, 20, 'Kini saatnya untuk mewujudkan semua imajinasimu menjadi nyata.\nKlik tombol di bawah ini untuk memulai petualangan kodingmu di Google AI Studio!', {
+                    fontFamily: 'system-ui, -apple-system, sans-serif',
+                    fontSize: '24px',
+                    color: '#94a3b8', // slate 400
+                    align: 'center',
+                    lineSpacing: 10
+                }).setOrigin(0.5);
+                endContainer.add(sub);
+
+                // Custom Styled CTA Button (Google AI Blue color #1a73e8)
+                const btnBg = this.add.graphics();
+                btnBg.fillStyle(0x1a73e8, 1);
+                // Draw a rounded rectangle centered locally at (0, 150)
+                btnBg.fillRoundedRect(-250, 110, 500, 70, 16);
+                endContainer.add(btnBg);
+
+                const btnText = this.add.text(0, 145, 'Mulai di Google AI Studio 🚀', {
+                    fontFamily: 'system-ui, -apple-system, sans-serif',
+                    fontSize: '24px',
+                    color: '#ffffff',
+                    fontStyle: 'bold'
+                }).setOrigin(0.5);
+                endContainer.add(btnText);
+
+                // Interactive zone for the button
+                const clickZone = this.add.zone(0, 145, 500, 70).setInteractive({ useHandCursor: true });
+                endContainer.add(clickZone);
+
+                // Hover effects
+                clickZone.on('pointerover', () => {
+                    btnBg.clear();
+                    btnBg.fillStyle(0x1557b0, 1); // Darker blue
+                    btnBg.fillRoundedRect(-250, 110, 500, 70, 16);
+                    btnText.setScale(1.05);
+                });
+
+                clickZone.on('pointerout', () => {
+                    btnBg.clear();
+                    btnBg.fillStyle(0x1a73e8, 1);
+                    btnBg.fillRoundedRect(-250, 110, 500, 70, 16);
+                    btnText.setScale(1);
+                });
+
+                clickZone.on('pointerdown', () => {
+                    AudioManager.playClick(this);
+                    // Open standard reliable pop-up in new tab
+                    window.open('https://aistudio.google.com/', '_blank');
+                });
+
+                // Fade in the elements container
+                this.tweens.add({
+                    targets: endContainer,
+                    alpha: 1,
+                    duration: 1000
+                });
+            }
         });
     }
 
