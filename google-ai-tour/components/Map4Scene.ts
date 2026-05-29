@@ -161,7 +161,7 @@ export class Map4Scene extends Phaser.Scene {
             { text: `kalian udah banyak belajar dari perjalanan ini bukan?`, speaker: 'ending' },
             { text: `dengan ilmu yang baru saja kalian pelajarin, kalian bisa membuat berbagai banyak hal seperti di atas dan bawahku ini`, speaker: 'ending' },
             { text: `kalian bisa bikn game, website, perintah suara, hitung matematika rumit, coding, bikin konten, dan masih banyak hal lagi`, speaker: 'ending' },
-            { text: `perjalanan kalian baru dimulai sekarang, dan cshaya di depan adalah jalan untuk mewujudkan semua imajinasi kalian`, speaker: 'ending' },
+            { text: `perjalanan kalian baru dimulai sekarang, dan cahaya di depan adalah jalan untuk mewujudkan semua imajinasi kalian`, speaker: 'ending' },
             { text: `jadi, ayo wujudkan imajinasi mu!`, speaker: 'ending' },
             { text: `hmm menarik, ayo ${this.playerName} kita coba bersama!`, speaker: 'gogole' }
         ], () => {
@@ -219,7 +219,7 @@ export class Map4Scene extends Phaser.Scene {
                 endContainer.add(title);
 
                 // Subtitle
-                const sub = this.add.text(0, 20, 'Kini saatnya untuk mewujudkan semua imajinasimu menjadi nyata.\nKlik tombol di bawah ini untuk memulai petualangan kodingmu di Google AI Studio!', {
+                const sub = this.add.text(0, 20, 'Kini saatnya untuk mewujudkan semua imajinasimu menjadi nyata.\nKlik tombol di bawah ini untuk memulai petualangan AI mu di Google AI Studio!', {
                     fontFamily: 'system-ui, -apple-system, sans-serif',
                     fontSize: '24px',
                     color: '#94a3b8', // slate 400

@@ -156,7 +156,7 @@ export class Map3Scene extends Phaser.Scene {
         this.dialogBox = this.add.container(960, 920).setScrollFactor(0).setAlpha(0).setDepth(20000);
         this.portraitSprite = this.add.sprite(-600, -320, 'nano_asset').setScale(6).setAlpha(0);
         const bg = this.add.rectangle(0, 0, 1500, 220, 0, 0.9).setStrokeStyle(4, 0x4285F4);
-        this.dialogText = this.add.text(0, 0, '', { fontSize: '32px', color: '#fff', wordWrap: { width: 1300 }, fontStyle: 'bold' }).setOrigin(0.5);
+        this.dialogText = this.add.text(0, 0, '', { fontSize: '38px', color: '#fff', wordWrap: { width: 1300 }, fontStyle: 'bold' }).setOrigin(0.5);
         this.dialogBox.add([this.portraitSprite, bg, this.dialogText]);
     }
 
@@ -579,28 +579,32 @@ vibe : robotnya akan bergerak cukup kencang dan efisien dalam membersihkan sampa
     }
 
     private startCleaningSequence() {
-        // Move to Trash 3 (1500, 900)
+        // Move to Trash 3 (1500, 900) — left
         this.tweens.add({
             targets: this.cleaningRobot,
             x: 1500, y: 900, duration: 800,
+            onStart: () => this.cleaningRobot.setFlipX(false),
             onComplete: () => {
                 if (this.trash3) this.trash3.destroy();
-                // Move to Trash 1 line (y=850) then to (700, 850)
+                // Move to Trash 1 (700, 850) — left
                 this.tweens.add({
                     targets: this.cleaningRobot,
                     x: 700, y: 850, duration: 1500,
+                    onStart: () => this.cleaningRobot.setFlipX(false),
                     onComplete: () => {
                         if (this.trash1) this.trash1.destroy();
-                        // Move to Trash 2 line (y=700) then to (1200, 700)
+                        // Move to Trash 2 (1200, 700) — right
                         this.tweens.add({
                             targets: this.cleaningRobot,
                             x: 1200, y: 700, duration: 1000,
+                            onStart: () => this.cleaningRobot.setFlipX(true),
                             onComplete: () => {
                                 if (this.trash2) this.trash2.destroy();
-                                // Park near AI Studio - Lowered to Y:800 to avoid overlapping stand
+                                // Park near AI Studio (1700, 800) — right
                                 this.tweens.add({
                                     targets: this.cleaningRobot,
                                     x: 1700, y: 800, duration: 1000,
+                                    onStart: () => this.cleaningRobot.setFlipX(true),
                                     onComplete: () => {
                                         this.time.delayedCall(500, () => {
                                             this.startSequence([

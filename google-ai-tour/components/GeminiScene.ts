@@ -194,9 +194,9 @@ export class GeminiScene extends Phaser.Scene {
 
         } else if (this.questState === 2) {
             this.startSequence([
-                { text: `eh kok hasilnya gini sih? rasanya kurang`, speaker: 'dr_gemini' },
+                { text: `eh kok hasilnya gini ya? rasanya kurang`, speaker: 'dr_gemini' },
                 { text: `waduh, kurang gimana?`, speaker: 'gogole' },
-                { text: `teks nya terlalu biasa gitu rasanya`, speaker: 'dr_gemini' },
+                { text: `teks nya terlalu biasa gitu, kurang menarik`, speaker: 'dr_gemini' },
                 { text: `Coba kamu nge prompt nya pakai format "Powerful Prompt" deh.`, speaker: 'dr_gemini' },
                 { text: `Kasih Gemini sebuah ROLE (Peran), tentukan GOAL (Tujuan), beri CONTEXT (Konteks), dan atur VIBE nya.`, speaker: 'dr_gemini' },
                 { text: `Dengan format itu, Gemini bakal ngasih hasil yang jauh lebih sakti!`, speaker: 'dr_gemini' },
@@ -210,12 +210,12 @@ export class GeminiScene extends Phaser.Scene {
 
         } else if (this.questState === 4) {
             this.startSequence([
-                { text: `Wahh ini baru mantapp bangett!!`, speaker: 'dr_gemini' },
-                { text: `teks nya jadi lebih padat, jelas dan kreatif bgt.`, speaker: 'dr_gemini' },
+                { text: `Wahh ini baru keren!`, speaker: 'dr_gemini' },
+                { text: `teks nya jadi lebih padat, jelas dan kreatif.`, speaker: 'dr_gemini' },
                 { text: `hehe keren kan?`, speaker: 'gogole' },
                 { text: `Kamu udah belajar cara prompt yang bener. Keren banget!`, speaker: 'dr_gemini' },
                 { text: `kamu bisa lanjut ke map selanjutnya ya, pintu disebelah kanan sudah terbuka`, speaker: 'dr_gemini' },
-                { text: `oke siap grak!`, speaker: 'gogole' }
+                { text: `oke! sampai jumpa lagi!`, speaker: 'gogole' }
             ], () => {
                 console.log("Quest Gemini Selesai! questState = 5. Silakan ke kanan map.");
                 this.questState = 5;

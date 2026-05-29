@@ -134,9 +134,9 @@ export default function Home() {
             </div>
             <h1 className="text-6xl md:text-8xl font-black text-center mb-4 tracking-tighter">
               <span className="text-[#4285F4]">G</span><span className="text-[#DB4437]">o</span><span className="text-[#F4B400]">o</span><span className="text-[#4285F4]">g</span><span className="text-[#0F9D58]">l</span><span className="text-[#DB4437]">e</span>
-              <span className="ml-4 text-black font-black uppercase tracking-tight">AI STUDIO TOUR</span>
+              <span className="ml-4 text-black font-black uppercase tracking-tight">AI TOUR</span>
             </h1>
-            <p className="text-gray-600 text-lg mb-12 text-center max-w-xl font-semibold tracking-wide text-black">Pengalaman seru menggunakan teknologi masa depan dengan Google AI Studio dan Gemini. Tur edukatif interaktif untuk belajar AI secara langsung.</p>
+            <p className="text-gray-600 text-lg mb-12 text-center max-w-xl font-semibold tracking-wide text-black">Pengalaman seru menggunakan teknologi masa depan bersama Google AI Studio dan Gemini. Tur edukatif interaktif untuk belajar AI secara langsung.</p>
             <button onClick={() => setGameState('guide')} className="px-14 py-5 bg-black text-white font-black rounded-full text-xl hover:scale-110 active:scale-95 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] border-4 border-black uppercase tracking-widest transition-all">Main Sekarang</button>
           </div>
         </div>
@@ -163,7 +163,7 @@ export default function Home() {
               <div className="bg-white p-6 rounded-[30px] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
                 <div className="flex justify-center mb-4"><img src="/assets/gogole.png" className="w-16 h-16 object-contain shadow-[4px_4px_0px_0px_rgba(244,180,0,1)] border-2 border-black rounded-2xl p-1" alt="Gogole" /></div>
                 <h3 className="text-xl mb-2 italic">AI ASISTEN</h3>
-                <p className="text-gray-600 font-bold text-xs tracking-tighter italic text-black">Klik robot di kiri untuk nanya!</p>
+                <p className="text-gray-600 font-bold text-xs tracking-tighter italic text-black">Klik robot di kiri untuk tanya apapun!</p>
               </div>
             </div>
             <div className="bg-[#DB4437]/10 p-6 rounded-2xl border-4 border-black w-full mb-10 text-center shadow-[10px_10px_0px_0px_rgba(219,68,55,1)]">
