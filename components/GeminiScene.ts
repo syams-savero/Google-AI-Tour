@@ -38,7 +38,8 @@ export class GeminiScene extends Phaser.Scene {
     private currentDialogIndex: number = 0;
 
     // API Key dari .env.local — wajib prefix NEXT_PUBLIC_ untuk Next.js
-    private readonly GEMINI_API_KEY: string = process.env.NEXT_PUBLIC_GEMINI_API_KEY ?? "";
+    // API Key dari .env.local — wajib prefix NEXT_PUBLIC_ untuk access dari browser/client-side
+    private readonly GEMINI_API_KEY: string = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
 
     constructor() {
         super('GeminiScene');
@@ -293,7 +294,7 @@ export class GeminiScene extends Phaser.Scene {
     private async fetchGemini(prompt: string, maxTokens: number): Promise<string | null> {
         try {
             const response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${this.GEMINI_API_KEY}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${this.GEMINI_API_KEY}`,
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },

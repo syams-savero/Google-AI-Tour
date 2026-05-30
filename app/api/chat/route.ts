@@ -1,7 +1,9 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 
-const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || "");
+const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+console.log("Gemini API Key status:", apiKey ? "LOADED" : "MISSING");
+const genAI = new GoogleGenerativeAI(apiKey || "");
 
 export async function POST(req: Request) {
     let userPrompt: string = "";
@@ -36,8 +38,16 @@ export async function POST(req: Request) {
 
         return NextResponse.json({ text });
     } catch (error: any) {
-        console.error("Gemini 3.5 API Error:", error);
-        // Fallback ke Gemini 3.1 Pro jika 3.5 masi preview/limit
+        console.error("Gemini API Error:", error);
+
+        if (error.status === 403 || error.message?.includes("leaked")) {
+            return NextResponse.json({
+                error: "API Key kamu terblokir (dilaporkan bocor/leaked). Silakan buat API Key baru di Google AI Studio.",
+                code: "API_KEY_LEAKED"
+            }, { status: 403 });
+        }
+
+        // Fallback ke Gemini 3.1 Pro jika masi limit (tapi tetep pake key yang sama)
         try {
             const fallbackModel = genAI.getGenerativeModel({ model: "gemini-3.1-pro" });
             const result = await fallbackModel.generateContent(userPrompt ?? "");
